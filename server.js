@@ -78,7 +78,33 @@ app.listen(PORT);
 
 //web service import
 const user = require('./user');
+const absence = require('./absence');
+const admin = require('./admin');
+const annee = require('./annee');
+const classe = require('./classe');
+const emploi = require('./emploi');
+const etudiant = require('./etudiant');
+const enseignant = require('./enseignant');
+const module1 = require('./module');
+const note = require('./note');
+const reclamation = require('./reclamtion');
+const resultat = require('./resultat');
+const login = require('./login');
+const register = require('./register');
 
 
-//runs
+//run
 user.run(router,connectionProperties,upload); 
+absence.run(router,connectionProperties); 
+admin.run(router,connectionProperties,upload); 
+annee.run(router,connectionProperties); 
+classe.run(router,connectionProperties); 
+emploi.run(router,connectionProperties,upload); 
+etudiant.run(router,connectionProperties,upload); 
+enseignant.run(router,connectionProperties,upload); 
+module1.run(router,connectionProperties); 
+note.run(router,connectionProperties);
+reclamation.run(router,connectionProperties); 
+resultat.run(router,connectionProperties); 
+login.run(router,connectionProperties); 
+register.run(router,connectionProperties); 

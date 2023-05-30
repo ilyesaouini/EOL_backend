@@ -38,7 +38,7 @@ router.route('/employees/').get(function (request, response) {
                            password: element.PASSWORD,image: element.IMAGE });
                             console.log('iam here');
 
-                           console.log(element.firstName);
+                           console.log(element.FIRSTNAME);
         }, this);
         response.json(employees)["metaData"];
         
@@ -136,6 +136,8 @@ router.route('/registre').patch(function (request, response) {
     const salt = await bcrypt.genSalt(10)
       const hash = await bcrypt.hash(body.password, salt);
       body.password = hash;
+      var role = request.body.role;
+      if(role =="student"){
 
     connection.execute("UPDATE EMPLOYEE SET PASSWORD=:password WHERE Email=:email",
       [body.password, email],
@@ -160,8 +162,11 @@ router.route('/registre').patch(function (request, response) {
         response.end();
         
       });
+    }
   });
 });
+
+
 /**
  * update image
  */
@@ -292,7 +297,7 @@ router.route('/image/').patch(function (request, response) {
 
 /**
  * login
- */
+ 
  router.post('/login',async function(request,response, next){
   var email = request.body.email;
   var pwd = request.body.password;
@@ -312,12 +317,12 @@ router.route('/image/').patch(function (request, response) {
       const hash = await bcrypt.hash(pwd, salt);
       pass = hash;
       console.log(pass);
-  console.log(user[user.length -1]);
+  console.log(user[user.length -2]);
 
   passs = user[user.length-2]
    for (var count =0 ; count <result.rows.length; count++)
    {
-     if ( bcrypt.compare(passs,pwd)){
+     if ( bcrypt.compare(user[user.length -2],pwd)){
            
         let token = jwt.sign({email: request.body.email},config.key,{
          expiresIn: "24H",
@@ -344,7 +349,7 @@ router.route('/image/').patch(function (request, response) {
 
  });
  
- 
+ */
 
 
 }
