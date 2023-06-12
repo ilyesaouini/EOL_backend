@@ -1,15 +1,13 @@
-const middleware = require("./middleware");
+
 var oracledb = require('oracledb');
-const jwt = require("jsonwebtoken");
-const config = require("./config");
-const bcrypt = require('bcrypt');
+
 async function run(router,connectionProperties) {
     
 /**
    * POST / 
    * Saves a new employee 
    */
-router.route('/reclamation/').post(function (request, response) {
+router.route('/note/').post(function (request, response) {
     console.log("POST ETUDIANT:");
     oracledb.getConnection(connectionProperties, async function (err, connection) {
       if (err) {
@@ -19,17 +17,14 @@ router.route('/reclamation/').post(function (request, response) {
       }
        
       var body = request.body;
-      const salt = await bcrypt.genSalt(10)
-      const hash = await bcrypt.hash(body.password, salt);
-      body.password = hash;
-  
-      connection.execute("INSERT INTO ESP_RECLAMATION (ID_RECLAMATION, DESCRIPTION, REPONSE,MODULE, ETUDIANT, ENSEIGNANT,RECLAMATION)"+ 
-                         "VALUES(EMPLOYEE_SEQ.NEXTVAL, :nom_prenom,:nom,:prenom,:email,:tel, :password)",
-        [body.id_etudiant, body.nom_prenom, body.nom, body.prenom, body.email, body.tel,  body.password],
+      
+      connection.execute("INSERT INTO ESP_NOTE (ID_NOTE, NOTE, MODULE,ETUDIANT)"+ 
+                         "VALUES(NOTE_SEQ.NEXTVAL,:note,:module,:etudiant)",
+        [ body.note, body.module, body.etudiant],
         function (err, result) {
           if (err) {
             console.error(err.message);
-            response.status(500).send("Error saving employee to DB");
+            response.status(500).send("Error saving NOTE to DB");
             
             return;
           }
@@ -47,7 +42,7 @@ router.route('/reclamation/').post(function (request, response) {
  * GET / 
  * Returns a list of employees 
  */
-router.route('/etudiants/').get(function (request, response) {
+router.route('/notes/').get(function (request, response) {
   console.log("GET EMPLOYEES");
   oracledb.getConnection(connectionProperties, function (err, connection) {
     if (err) {
@@ -56,7 +51,7 @@ router.route('/etudiants/').get(function (request, response) {
       return;
     }
     console.log("After connection");
-    connection.execute("SELECT * FROM esp_etudiant",{},
+    connection.execute("SELECT * FROM esp_note",{},
       { outFormat: oracledb.OBJECT },
       function (err, result) {
         if (err) {
@@ -69,14 +64,12 @@ router.route('/etudiants/').get(function (request, response) {
         console.log("RESULTSET:" + JSON.stringify(result));
         var employees = [];
         result.rows.forEach(function (element) {
-          employees.push({ id_etudiant: element.ID_ETUDIANT, nom_prenom: element.NOM_PRENOM, 
-                           nom: element.NOM, prenom: element.PRENOM, 
-                           email: element.EMAIL, tel: element.TEL, 
-                           classe: element.CLASSE, date_de_naissance: element.DATE_DE_NAISSANCE,
-                           password: element.PASSWORD,image: element.IMAGE });
+          employees.push({ id_note: element.ID_NOTE, note: element.NOTE, 
+                           module: element.MODULE, etudiant: element.ETUDIANT, 
+                            });
                             console.log('iam here');
 
-                           console.log(element.FIRSTNAME);
+                           console.log(element.ID_NOTE);
         }, this);
         response.json(employees)["metaData"];
         
@@ -92,7 +85,7 @@ router.route('/etudiants/').get(function (request, response) {
  */
 
 
-router.route('/etudiant/:id').put(function (request, response) {
+router.route('/note/:id').put(function (request, response) {
   console.log("PUT ETUDIANT:");
   oracledb.getConnection(connectionProperties, function (err, connection) {
     if (err) {
@@ -104,7 +97,7 @@ router.route('/etudiant/:id').put(function (request, response) {
     var body = request.body;
     var id = request.params.id;
 
-    connection.execute("UPDATE ESP_ETUDIANT SET NOM_PRENOM=:nom_prenom, NOM=:nom, PRENOM=:prenom, EMAIL=:email,"+
+    connection.execute("UPDATE ESP_NOTE SET NOM_PRENOM=:nom_prenom, NOM=:nom, PRENOM=:prenom, EMAIL=:email,"+
                        " DATE_DE_NAISSANCE=:date_de_naissance, TEL=:tel,  WHERE ID_ETUDIANT=:id",
       [body.nom_prenom, body.nom,body.prenom, body.email, body.date_de_naissance, body.tel,  id],
       function (err, result) {

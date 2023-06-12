@@ -1,8 +1,6 @@
-const middleware = require("./middleware");
+
 var oracledb = require('oracledb');
-const jwt = require("jsonwebtoken");
-const config = require("./config");
-const bcrypt = require('bcrypt');
+
 
 async function run(router,connectionProperties) {
         
@@ -76,7 +74,10 @@ router.route('/absences/').get(function (request, response) {
 
                            console.log(element.ETUDIANT);
         }, this);
-        response.json(employees)["metaData"];
+       
+        response.status(200).json({
+          absence : employees
+        });
         
         
       });

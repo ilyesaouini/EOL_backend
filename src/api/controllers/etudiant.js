@@ -1,7 +1,6 @@
-const middleware = require("./middleware");
+
 var oracledb = require('oracledb');
-const jwt = require("jsonwebtoken");
-const config = require("./config");
+
 const bcrypt = require('bcrypt');
 
 
@@ -13,34 +12,36 @@ async function run(router,connectionProperties,upload) {
    * Saves a new employee 
    */
 router.route('/etudiant/').post(function (request, response) {
-    console.log("POST ETUDIANT:");
-    oracledb.getConnection(connectionProperties, async function (err, connection) {
-      if (err) {
-        console.error(err.message);
-        response.status(500).send("Error connecting to DB");
-        return;
-      }
-       
-      var body = request.body;
-      const salt = await bcrypt.genSalt(10)
-      const hash = await bcrypt.hash(body.password, salt);
-      body.password = hash;
-  
-      connection.execute("INSERT INTO ESP_ETUDIANT (ID_ETUDIANT, NOM_PRENOM, NOM,PRENOM, EMAIL, TEL,PASSWORD)"+ 
-                         "VALUES(:id_etudiant, :nom_prenom,:nom,:prenom,:email,:tel, :password)",
-        [body.id_etudiant, body.nom_prenom, body.nom, body.prenom, body.email, body.tel,  body.password],
-        function (err, result) {
-          if (err) {
-            console.error(err.message);
-            response.status(500).send("Error saving employee to DB");
-            
-            return;
-          }
-          response.end();
+  console.log("POST ETUDIANT:");
+  oracledb.getConnection(connectionProperties, async function (err, connection) {
+    if (err) {
+      console.error(err.message);
+      response.status(500).send("Error connecting to DB");
+      return;
+    }
+     
+    var body = request.body;
+    const salt = await bcrypt.genSalt(10)
+    const hash = await bcrypt.hash(body.password, salt);
+    body.password = hash;
+
+    connection.execute("INSERT INTO ESP_ETUDIANT (ID_ETUDIANT, NOM_PRENOM, NOM,PRENOM, EMAIL, TEL,PASSWORD)"+ 
+                       "VALUES(:id_etudiant, :nom_prenom,:nom,:prenom,:email,:tel,:password)",
+      [body.id_etudiant, body.nom_prenom, body.nom, body.prenom, body.email, body.tel,  body.password],
+      function (err, result) {
+        if (err) {
+          console.error(err.message);
+          response.status(500).send("Error saving employee to DB");
           
-        });
-    });
+          return;
+        }
+        
+        response.end();
+        
+      });
+     
   });
+});
 
 
 
@@ -157,41 +158,38 @@ router.get('/etudiant/:id', async (req, res) => {
 
 
 
- /**
+
+  /**
    * DELETE / 
    * Delete a employee 
    */
- router.route('/etudiant/:id').delete(function (request, response) {
-  console.log("DELETE EMPLOYEE ID:"+request.params.id);
-  oracledb.getConnection(connectionProperties, function (err, connection) {
-    if (err) {
-      console.error(err.message);
-      response.status(500).send("Error connecting to DB");
-      return;
-    }
+  router.route('/etudiant/:id').delete(function (request, response) {
+    console.log("DELETE EMPLOYEE ID:"+request.params.id);
+    oracledb.getConnection(connectionProperties, function (err, connection) {
+      if (err) {
+        console.error(err.message);
+        response.status(500).send("Error connecting to DB");
+        return;
+      }
 
-    
-
-    var body = request.body;
-    var id = request.params.id;
-    connection.execute("DELETE FROM ESP_ETUDIANT WHERE ID_ETUDIANT = :id",
-      [id],
-      function (err, result) {
-        if (err) {
-          console.error(err.message);
-          response.status(500).send("Error deleting employee to DB");
+      
+  
+      var body = request.body;
+      var id = request.params.id;
+      connection.execute("DELETE FROM ESP_ETUDIANT WHERE ID_ETUDIANT = :id",
+        [id],
+        function (err, result) {
+          if (err) {
+            console.error(err.message);
+            response.status(500).send("Error deleting employee to DB");
+            
+            return;
+          }
+          response.end();
           
-          return;
-        }
-        response.end();
-        
-      });
+        });
+    });
   });
-});
-
-
-
-
 
 
 

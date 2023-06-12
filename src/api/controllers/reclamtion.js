@@ -1,15 +1,13 @@
-const middleware = require("./middleware");
+
 var oracledb = require('oracledb');
-const jwt = require("jsonwebtoken");
-const config = require("./config");
-const bcrypt = require('bcrypt');
+
 async function run(router,connectionProperties) {
     
 /**
    * POST / 
    * Saves a new employee 
    */
-router.route('/note/').post(function (request, response) {
+router.route('/reclamation/').post(function (request, response) {
     console.log("POST ETUDIANT:");
     oracledb.getConnection(connectionProperties, async function (err, connection) {
       if (err) {
@@ -19,14 +17,14 @@ router.route('/note/').post(function (request, response) {
       }
        
       var body = request.body;
-      
-      connection.execute("INSERT INTO ESP_NOTE (ID_NOTE, NOTE, MODULE,ETUDIANT)"+ 
-                         "VALUES(NOTE_SEQ.NEXTVAL,:note,:module,:etudiant)",
-        [ body.note, body.module, body.etudiant],
+     body.status= "encours"
+      connection.execute("INSERT INTO ESP_RECLAMATION (ID_RECLAMATION, DESCRIPTION,MODULE,ETUDIANT,ENSEIGNANT,STATUS)"+ 
+                         "VALUES(RECLAMATION_SEQ.NEXTVAL, :description,:module,:etudiant,:enseignant,:status)",
+        [body.description,body.module,body.etudiant,body.enseignant,body.status],
         function (err, result) {
           if (err) {
             console.error(err.message);
-            response.status(500).send("Error saving NOTE to DB");
+            response.status(500).send("Error saving employee to DB");
             
             return;
           }
@@ -44,7 +42,7 @@ router.route('/note/').post(function (request, response) {
  * GET / 
  * Returns a list of employees 
  */
-router.route('/notes/').get(function (request, response) {
+router.route('/reclamations/').get(function (request, response) {
   console.log("GET EMPLOYEES");
   oracledb.getConnection(connectionProperties, function (err, connection) {
     if (err) {
@@ -53,7 +51,7 @@ router.route('/notes/').get(function (request, response) {
       return;
     }
     console.log("After connection");
-    connection.execute("SELECT * FROM esp_note",{},
+    connection.execute("SELECT * FROM ESP_RECLAMATION",{},
       { outFormat: oracledb.OBJECT },
       function (err, result) {
         if (err) {
@@ -66,12 +64,14 @@ router.route('/notes/').get(function (request, response) {
         console.log("RESULTSET:" + JSON.stringify(result));
         var employees = [];
         result.rows.forEach(function (element) {
-          employees.push({ id_note: element.ID_NOTE, note: element.NOTE, 
+          employees.push({ id_reclamation: element.ID_RECLAMATION, description: element.DESCRIPTION,
+                            reponse: element.REPONSE, 
                            module: element.MODULE, etudiant: element.ETUDIANT, 
-                            });
+                           enseignant: element.ENSEIGNANT, Rereclamation: element.RECLAMATION, 
+                           status: element.STATUS,  });
                             console.log('iam here');
 
-                           console.log(element.ID_NOTE);
+                           console.log(element.ID_RECLAMATION);
         }, this);
         response.json(employees)["metaData"];
         
@@ -87,7 +87,7 @@ router.route('/notes/').get(function (request, response) {
  */
 
 
-router.route('/note/:id').put(function (request, response) {
+router.route('/reclamation/:id').put(function (request, response) {
   console.log("PUT ETUDIANT:");
   oracledb.getConnection(connectionProperties, function (err, connection) {
     if (err) {
@@ -99,8 +99,8 @@ router.route('/note/:id').put(function (request, response) {
     var body = request.body;
     var id = request.params.id;
 
-    connection.execute("UPDATE ESP_NOTE SET NOM_PRENOM=:nom_prenom, NOM=:nom, PRENOM=:prenom, EMAIL=:email,"+
-                       " DATE_DE_NAISSANCE=:date_de_naissance, TEL=:tel,  WHERE ID_ETUDIANT=:id",
+    connection.execute("UPDATE ESP_RECLAMATION SET NOM_PRENOM=:nom_prenom, NOM=:nom, PRENOM=:prenom, EMAIL=:email,"+
+                       " DATE_DE_NAISSANCE=:date_de_naissance, TEL=:tel,  WHERE ID_RECLAMATION=:id",
       [body.nom_prenom, body.nom,body.prenom, body.email, body.date_de_naissance, body.tel,  id],
       function (err, result) {
         if (err) {
@@ -120,7 +120,7 @@ router.route('/note/:id').put(function (request, response) {
 
 
 //get by id
-router.get('/etudiant/:id', async (req, res) => {
+router.get('/reclamation/:id', async (req, res) => {
   const { id } = req.params;
 
   let connection;
@@ -128,7 +128,7 @@ router.get('/etudiant/:id', async (req, res) => {
   try {
     connection = await oracledb.getConnection(connectionProperties);
 
-    const query = `SELECT * FROM ESP_ETUDIANT WHERE ID_ETUDIANT = :id`;
+    const query = `SELECT * FROM ESP_RECLAMATION WHERE ID_RECLAMATION = :id`;
     const result = await connection.execute(query, { id });
 
     if (result.rows.length === 0) {
@@ -153,7 +153,7 @@ router.get('/etudiant/:id', async (req, res) => {
    * DELETE / 
    * Delete a employee 
    */
- router.route('/etudiant/:id').delete(function (request, response) {
+ router.route('/reclamation/:id').delete(function (request, response) {
   console.log("DELETE EMPLOYEE ID:"+request.params.id);
   oracledb.getConnection(connectionProperties, function (err, connection) {
     if (err) {
@@ -166,7 +166,7 @@ router.get('/etudiant/:id', async (req, res) => {
 
     var body = request.body;
     var id = request.params.id;
-    connection.execute("DELETE FROM ESP_ETUDIANT WHERE ID_ETUDIANT = :id",
+    connection.execute("DELETE FROM ESP_RECLAMATION WHERE ID_RECLAMATION = :id",
       [id],
       function (err, result) {
         if (err) {

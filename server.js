@@ -77,20 +77,20 @@ app.listen(PORT);
 
 
 //web service import
-const user = require('./user');
-const absence = require('./absence');
-const admin = require('./admin');
-const annee = require('./annee');
-const classe = require('./classe');
-const emploi = require('./emploi');
-const etudiant = require('./etudiant');
-const enseignant = require('./enseignant');
-const module1 = require('./module');
-const note = require('./note');
-const reclamation = require('./reclamtion');
-const resultat = require('./resultat');
-const login = require('./login');
-const register = require('./register');
+const user = require('./src/api/controllers/user');
+const absence = require('./src/api/controllers/absence');
+const admin = require('./src/api/controllers/admin');
+const annee = require('./src/api/controllers/annee');
+const classe = require('./src/api/controllers/classe');
+const emploi = require('./src/api/controllers/emploi');
+const etudiant = require('./src/api/controllers/etudiant');
+const enseignant = require('./src/api/controllers/enseignant');
+const module1 = require('./src/api/controllers/module');
+const note = require('./src/api/controllers/note');
+const reclamation = require('./src/api/controllers/reclamtion');
+const resultat = require('./src/api/controllers/resultat');
+const login = require('./src/api/controllers/login');
+const register = require('./src/api/controllers/register');
 
 
 //run

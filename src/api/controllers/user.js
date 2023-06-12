@@ -1,7 +1,7 @@
-const middleware = require("./middleware");
+
 var oracledb = require('oracledb');
 const jwt = require("jsonwebtoken");
-const config = require("./config");
+const config = require("./../../config/config");
 const bcrypt = require('bcrypt');
 async function run(router,connectionProperties,upload) {
 
