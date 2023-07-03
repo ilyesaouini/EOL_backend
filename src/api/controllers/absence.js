@@ -152,6 +152,35 @@ router.get('/absence/:id', async (req, res) => {
 });
 
 
+//get by id
+router.get('/absenceetudiant/:id', async (req, res) => {
+  const { id } = req.params;
+
+  let connection;
+
+  try {
+    connection = await oracledb.getConnection(connectionProperties);
+
+    const query = `SELECT * FROM ESP_ABSENCE WHERE ETUDIANT = :id`;
+    const result = await connection.execute(query, { id });
+
+    if (result.rows.length === 0) {
+      return res.status(404).send('ABSENCE not found');
+    }
+
+    const user = result.rows[0];
+    res.send(user);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Internal server error');
+  } finally {
+    if (connection) {
+      await connection.close();
+    }
+  }
+});
+
+
 
  /**
    * DELETE / 

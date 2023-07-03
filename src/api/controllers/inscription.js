@@ -1,14 +1,15 @@
 
 var oracledb = require('oracledb');
 
-async function run(router,connectionProperties,upload) {
+
+async function run(router,connectionProperties) {
 
 
   /**
      * POST / 
      * Saves a new employee 
      */
-  router.route('/emploi/',upload.single('image')).post(function (request, response) {
+  router.route('/inscription/').post(function (request, response) {
       console.log("POST ETUDIANT:");
       oracledb.getConnection(connectionProperties, async function (err, connection) {
         if (err) {
@@ -20,9 +21,9 @@ async function run(router,connectionProperties,upload) {
         var body = request.body;
         
     
-        connection.execute("INSERT INTO ESP_EMPLOI (ID_EMPLOI, EMPLOI)"+ 
-                           "VALUES(:id_emploi, :emploi)",
-          [body.id_emploi, body.emploi],
+        connection.execute("INSERT INTO ESP_INSCRIPTION (ID_INSCRIPTION, DESCRIPTION)"+ 
+                           "VALUES(:id_inscription, :description)",
+          [body.id_inscription, body.description],
           function (err, result) {
             if (err) {
               console.error(err.message);
@@ -34,7 +35,6 @@ async function run(router,connectionProperties,upload) {
             
           });
       });
-      
     });
   
   
@@ -45,7 +45,7 @@ async function run(router,connectionProperties,upload) {
    * GET / 
    * Returns a list of employees 
    */
-  router.route('/emplois/').get(function (request, response) {
+  router.route('/inscriptions/').get(function (request, response) {
     console.log("GET EMPLOYEES");
     oracledb.getConnection(connectionProperties, function (err, connection) {
       if (err) {
@@ -54,7 +54,7 @@ async function run(router,connectionProperties,upload) {
         return;
       }
       console.log("After connection");
-      connection.execute("SELECT * FROM esp_emploi",{},
+      connection.execute("SELECT * FROM esp_inscription",{},
         { outFormat: oracledb.OBJECT },
         function (err, result) {
           if (err) {
@@ -67,7 +67,7 @@ async function run(router,connectionProperties,upload) {
           console.log("RESULTSET:" + JSON.stringify(result));
           var employees = [];
           result.rows.forEach(function (element) {
-            employees.push({ id_emploi: element.ID_EMPLOI, emploi: element.EMPLOI });
+            employees.push({ id_inscription: element.ID_inscription, description: element.DESCRIPTION });
                               console.log('iam here');
   
                              console.log(element.FIRSTNAME);
@@ -86,7 +86,7 @@ async function run(router,connectionProperties,upload) {
    */
   
   
-  router.route('/emploi/:id').put(function (request, response) {
+  router.route('/inscription/:id').put(function (request, response) {
     console.log("PUT ETUDIANT:");
     oracledb.getConnection(connectionProperties, function (err, connection) {
       if (err) {
@@ -98,8 +98,8 @@ async function run(router,connectionProperties,upload) {
       var body = request.body;
       var id = request.params.id;
   
-      connection.execute("UPDATE ESP_EMPLOI SET EMPLOI=:emploi  WHERE ID_EMPLOI=:id",
-        [body.emploi,  id],
+      connection.execute("UPDATE ESP_INSCRIPTION SET DESCRIPTION=:description  WHERE ID_INSCRIPTION=:id",
+        [body.description,  id],
         function (err, result) {
           if (err) {
             console.error(err.message);
@@ -118,7 +118,7 @@ async function run(router,connectionProperties,upload) {
   
   
   //get by id
-  router.get('/emploi/:id', async (req, res) => {
+  router.get('/inscription/:id', async (req, res) => {
     const { id } = req.params;
   
     let connection;
@@ -126,7 +126,7 @@ async function run(router,connectionProperties,upload) {
     try {
       connection = await oracledb.getConnection(connectionProperties);
   
-      const query = `SELECT * FROM ESP_EMPLOI WHERE ID_EMPLOI = :id`;
+      const query = `SELECT * FROM ESP_INSCRIPTION WHERE ETUDIANT = :id`;
       const result = await connection.execute(query, { id });
   
       if (result.rows.length === 0) {
@@ -151,7 +151,7 @@ async function run(router,connectionProperties,upload) {
      * DELETE / 
      * Delete a employee 
      */
-   router.route('/emploi/:id').delete(function (request, response) {
+   router.route('/inscription/:id').delete(function (request, response) {
     console.log("DELETE EMPLOYEE ID:"+request.params.id);
     oracledb.getConnection(connectionProperties, function (err, connection) {
       if (err) {
@@ -164,7 +164,7 @@ async function run(router,connectionProperties,upload) {
   
       var body = request.body;
       var id = request.params.id;
-      connection.execute("DELETE FROM ESP_EMPLOI WHERE ID_EMPLOI = :id",
+      connection.execute("DELETE FROM ESP_INSCRIPTION WHERE ETUDIANT = :id",
         [id],
         function (err, result) {
           if (err) {

@@ -42,7 +42,7 @@ router.route('/register').patch(function (request, response) {
           
           let token = jwt.sign({email: request.body.email},config.key,{
             expiresIn: "24H",});
-            sendMail("http://192.168.1.240:8089/verify/"+token,email.toString());
+            sendMail("http://192.168.1.240:8089/verify/"+token.id,email.toString());
             const query = `SELECT * FROM ESP_ETUDIANT WHERE email = :email`;
     const usr = await connection.execute(query, { email });
     const reg = usr.rows[0];
@@ -68,7 +68,7 @@ router.route('/register').patch(function (request, response) {
   
           let token = jwt.sign({email: request.body.email},config.key,{
             expiresIn: "24H",});
-            sendMail("http://192.168.1.240:8089/verify/"+token,email.toString());
+            sendMail("http://192.168.1.240:8089/verify/"+token.id,email.toString());
             const query = `SELECT * FROM ESP_ENSEIGNANT WHERE email = :email`;
     const usr = await connection.execute(query, { email });
     const reg = usr.rows[0];
@@ -94,7 +94,7 @@ router.route('/register').patch(function (request, response) {
   
           let token = jwt.sign({email: request.body.email},config.key,{
             expiresIn: "24H",});
-            sendMail("http://192.168.1.240:8089/verify/"+token,email.toString());
+            sendMail("http://192.168.1.240:8089/verify/"+token.id,email.toString());
             const query = `SELECT * FROM ESP_ADMIN WHERE email = :email`;
     const usr = await connection.execute(query, { email });
     const reg = usr.rows[0];
@@ -111,11 +111,38 @@ router.route('/register').patch(function (request, response) {
   });
   
 
+/*------------------EXTRA FUNCTIONS----------------*/
+//verification
+  router.patch('/verify/:id', async (req, res) => {
+    let us= req.body;
+    oracledb.getConnection(connectionProperties, async function (err, connection) {
+      if (err) {
+        console.error(err.message);
+        response.status(500).send("Error connecting to DB");
+        return;
+      }
+      //mysqlConnection.query('SELECT * FROM token WHERE token = ?', [req.params.id], (err1, usrows, fields) => {
+        
+        connection.query('SELECT * FROM esp_user WHERE id = ?', [req.params.id], (err1, usrows, fields) => {
+          if(usrows[0].state)
+          connection.query("Update esp_user SET state = 0 WHERE id = ?", [req.params.id], (err, rows, fields) => {
+            if (!err)
+            {
+              usrows[0].state=0;
+              //res.send(usrows);
+              res.send("{\"State\":\"0\"}")
+              
+            }
+            else
+            console.log(err);
+          })
+        })
+      })
+});
 
-
-  function sendMail(confirm,email) {
-    var transporter = nodemailer.createTransport({
-        service: 'gmail',
+function sendMail(confirm,email) {
+  var transporter = nodemailer.createTransport({
+    service: 'gmail',
         auth: {
         user: 'ilyesslawini@gmail.com',
         pass: 'dsipmqcignhgsria'

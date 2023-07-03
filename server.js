@@ -60,7 +60,7 @@ const storage = multer.diskStorage({
     }
 });
 const fileFilter = (req, file, cb) => {
-    if (file.mimetype == 'image/jpeg' || file.mimetype == 'image/png') {
+    if (file.mimetype == 'image/jpeg' || file.mimetype == 'image/png' || file.mimetype == 'image/jpg') {
         cb(null, true);
     } else {
         cb(null, false);
@@ -91,6 +91,8 @@ const reclamation = require('./src/api/controllers/reclamtion');
 const resultat = require('./src/api/controllers/resultat');
 const login = require('./src/api/controllers/login');
 const register = require('./src/api/controllers/register');
+const entete_note = require('./src/api/controllers/entete_note');
+const r1 = require('./src/api/controllers/r1');
 
 
 //run
@@ -108,3 +110,5 @@ reclamation.run(router,connectionProperties);
 resultat.run(router,connectionProperties); 
 login.run(router,connectionProperties); 
 register.run(router,connectionProperties); 
+entete_note.run(router,connectionProperties); 
+r1.run(router,connectionProperties); 

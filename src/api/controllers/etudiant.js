@@ -225,6 +225,10 @@ router.route('/imageetudiant/').patch(function (request, response) {
   });
 });
 
+
+
+
+
 }
 
 
@@ -234,62 +238,3 @@ router.route('/imageetudiant/').patch(function (request, response) {
 
 module.exports = {run}
 
-
-/*
-/**
- * login
- */
-
-/*
-router.post('/loginetudiant',async function(request,response, next){
-  var email = request.body.email;
-  var pwd = request.body.password;
-
-  let connection;
-  
-  connection = await oracledb.getConnection(connectionProperties);  
-  const query = `SELECT * FROM ESP_ETUDIANT WHERE email = :email`;
-  const result = await connection.execute(query, { email });
-
-  if( email.length !==0 && pwd.length !== 0){
-     if(result.rows.length > 0){
-
-  const user = result.rows[0];
-  console.log(pwd);
-  const salt = await bcrypt.genSalt(10);
-      const hash = await bcrypt.hash(pwd, salt);
-      pass = hash;
-      console.log(pass);
-  console.log(user[user.length -2]);
-
-  passs = user[user.length-2]
-   for (var count =0 ; count <result.rows.length; count++)
-   {
-     if ( bcrypt.compare(user[user.length -2],pwd)){
-           
-        let token = jwt.sign({email: request.body.email},config.key,{
-         expiresIn: "24H",
-     });
-      console.log('logged in');
-      response.status(200).json({
-        token: token,
-        user: user,
-        msg: "success",});
-        
-            
-     }else{
-   return response.send('incorrect password');
-     }
-   }
-     }else{
-       return response.send('incorrect mail');
-     }
-
-   }else{
-    return response.send('mail and pwd must not empty');
-   }
-  
-
- });
-
-*/
