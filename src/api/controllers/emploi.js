@@ -21,8 +21,8 @@ async function run(router,connectionProperties,upload) {
         
     
         connection.execute("INSERT INTO ESP_EMPLOI (ID_EMPLOI, EMPLOI)"+ 
-                           "VALUES(:id_emploi, :emploi)",
-          [body.id_emploi, body.emploi],
+                           "VALUES(EMPLOI_SEQ.NEXTVAL, :emploi)",
+          [ body.emploi],
           function (err, result) {
             if (err) {
               console.error(err.message);

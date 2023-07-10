@@ -47,36 +47,45 @@ async function run(router,connectionProperties) {
    */
   router.route('/inscriptions/').get(function (request, response) {
     console.log("GET EMPLOYEES");
-    oracledb.getConnection(connectionProperties, function (err, connection) {
-      if (err) {
-        console.error(err.message);
-        response.status(500).send("Error connecting to DB");
-        return;
-      }
-      console.log("After connection");
-      connection.execute("SELECT * FROM esp_inscription",{},
-        { outFormat: oracledb.OBJECT },
-        function (err, result) {
-          if (err) {
-            console.error(err.message);
-            response.status(500).send("Error getting data from DB");
-            doRelease(connection);
-            return;
-          }
-          console.log('iam here');
-          console.log("RESULTSET:" + JSON.stringify(result));
-          var employees = [];
-          result.rows.forEach(function (element) {
-            employees.push({ id_inscription: element.ID_inscription, description: element.DESCRIPTION });
-                              console.log('iam here');
-  
-                             console.log(element.FIRSTNAME);
-          }, this);
-          response.json(employees)["metaData"];
+  oracledb.getConnection(connectionProperties, function (err, connection) {
+    if (err) {
+      console.error(err.message);
+      response.status(500).send("Error connecting to DB");
+      return;
+    }
+    console.log("After connection");
+    connection.execute("SELECT * FROM esp_inscription",{},
+      { outFormat: oracledb.OBJECT },
+      function (err, result) {
+        if (err) {
+          console.error(err.message);
+          response.status(500).send("Error getting data from DB");
           
-          
-        });
-    });
+          return;
+        }
+        console.log('iam here');
+        console.log("RESULTSET:" + JSON.stringify(result));
+        var employees = [];
+        result.rows.forEach(function (element) {
+          employees.push({ 
+            id_inscription: element.ID_INSCRIPTION,
+            etudiant: element.ETUDIANT,
+            niveau_access: element.NIVEAU_ACCESS,
+            code_classe: element.CODE_CLASSE,
+            annee: element.ANNEE,
+            moy_generale: element.MOY_GENERALE,
+            moy_semestre1: element.MOY_SEMESTRE1,
+            decision: element.DECISION,
+                            });
+                            console.log('iam here');
+
+                           console.log(element.ETUDIANT);
+        }, this);
+        response.json(employees)["metaData"];
+        
+        
+      });
+  });
   });
   
   

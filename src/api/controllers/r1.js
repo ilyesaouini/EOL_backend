@@ -29,17 +29,29 @@ router.route('/register1').patch(function (request, response) {
     const q = `SELECT * FROM ESP_USER WHERE email = :email  `;
     const r = await connection.execute(q,{email});
     console.log('result',r.rows);
-    console.log('result',r.rows[0]);
-    
-    if(r.rows.password == null){
+    console.log('result',r.rows[0][2]);
+    idc= r.rows[0][0];
+    if(r.rows[0][2] == null){
 
-      let token = jwt.sign({email: request.body.email, hash},config.key,{
-        expiresIn: "1H",});
-      sendMail("http://192.168.1.240:8089/modifier/"+r.rows[0][0],hash,email.toString());
-
-       //const r1 = await axios.patch('http://localhost:8089/modifier/'+r.rows[0][0]+'/'+hash);
-       //console.log(r1);
       
+      sendMail("https://86d7-196-234-144-33.eu.ngrok.io/modifier/"+r.rows[0][0],hash,email.toString());
+      
+      /*
+      connection.execute("UPDATE ESP_USER SET PASSWORD=:password WHERE ID=:id",
+      [body.password, idc],
+      async function (err, result) {
+        if (err) {
+          console.error(err.message);
+          response.status(500).send("Error updating employee to DB");
+          
+          
+          return;
+        }
+console.log(result);
+       
+      }
+      );
+        */
     if(r.rows.role = "01"){
       connection.execute("UPDATE ESP_ETUDIANT SET PASSWORD=:password WHERE Email=:email",
         [body.password, email],
@@ -69,6 +81,10 @@ router.route('/register1').patch(function (request, response) {
 
     }
     
+    }else{
+      console.log("password not empty");
+      response.status(201).send("password not empty");
+      response.end();
     }
 
   }
@@ -89,6 +105,7 @@ router.route('/verify/:id/:password').patch(function (request, response) {
       response.status(500).send("Error connecting to DB");
       return;
     }
+
   
     
   
@@ -97,7 +114,7 @@ router.route('/verify/:id/:password').patch(function (request, response) {
 })
 
 
-router.route('/modifier/').patch(function (request, response) {
+router.route('/modifier/:id/:password').patch(function (request, response) {
   console.log("PUT EMPLOYEE:");
   oracledb.getConnection(connectionProperties, async function (err, connection) {
     if (err) {
@@ -106,8 +123,8 @@ router.route('/modifier/').patch(function (request, response) {
       return;
     }
 
-    var password = request.body.password;
-    var id = request.body.id;
+    var password = request.params.password;
+    var id = request.params.id;
     
 
     connection.execute("UPDATE ESP_USER SET PASSWORD=:password WHERE ID=:id",
@@ -127,7 +144,7 @@ router.route('/modifier/').patch(function (request, response) {
 });
 
 
-function sendMail(confirm,cofirm1,email) {
+ function sendMail(confirm,cofirm1,email) {
   var transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
@@ -140,7 +157,7 @@ function sendMail(confirm,cofirm1,email) {
     from: 'ilyesslawini@gmail.com',
     to: email,
     subject: 'Proceed Email Confirmation!',
-    text: 'Thank you for subscribing to EOL you did very well by choosing us dear client, we really appreciate it.\n Will you please verify your email now by clicking on this link: '+confirm
+    text: 'Thank you for subscribing to EOL you did very well by choosing us dear client, we really appreciate it.\n Will you please verify your email now by clicking on this link: '+confirm+'/'+cofirm1
   };
 
   transporter.sendMail(mailOptions, function(error, info){
@@ -150,6 +167,12 @@ function sendMail(confirm,cofirm1,email) {
       console.log('Email sent: ' + info.response);
     }
   });
+
+  
+  
+  
+  
+  
 }
 }
 

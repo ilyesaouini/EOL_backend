@@ -128,7 +128,7 @@ router.get('/module/:id', async (req, res) => {
   try {
     connection = await oracledb.getConnection(connectionProperties);
 
-    const query = `SELECT * FROM ESP_MODULE WHERE ID_MODULE = :id`;
+    const query = `SELECT ENSEIGNANT FROM ESP_MODULE WHERE ID_MODULE = :id`;
     const result = await connection.execute(query, { id });
 
     if (result.rows.length === 0) {

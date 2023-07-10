@@ -3,7 +3,8 @@ var app = express();
 var bodyParser = require('body-parser');
 const path = require('path');
 const multer = require('multer');
-
+const bodyparser = require('body-parser');
+app.use(bodyparser.json());
 var oracledb = require('oracledb');
 oracledb.autoCommit = true;
 
@@ -13,13 +14,7 @@ var connectionProperties = {
   connectString: process.env.DBAAS_DEFAULT_CONNECT_DESCRIPTOR || "localhost/xe"
 };
 
-function doRelease(connection) {
-  connection.release(function (err) {
-    if (err) {
-      console.error(err.message);
-    }
-  });
-}
+
 
 // configure app to use bodyParser()
 // this will let us get the data from a POST
@@ -52,7 +47,7 @@ app.use('/images', express.static(path.join(__dirname, '/images')));
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, 'images');
+        cb(null, './images');
     },
     filename: (req, file, cb) => {
         console.log(file);
@@ -66,6 +61,8 @@ const fileFilter = (req, file, cb) => {
         cb(null, false);
     }
 }
+
+  
 const upload = multer({ storage: storage, fileFilter: fileFilter });
 
 
@@ -93,6 +90,7 @@ const login = require('./src/api/controllers/login');
 const register = require('./src/api/controllers/register');
 const entete_note = require('./src/api/controllers/entete_note');
 const r1 = require('./src/api/controllers/r1');
+const inscription = require('./src/api/controllers/inscription');
 
 
 //run
@@ -112,3 +110,4 @@ login.run(router,connectionProperties);
 register.run(router,connectionProperties); 
 entete_note.run(router,connectionProperties); 
 r1.run(router,connectionProperties); 
+inscription.run(router,connectionProperties); 

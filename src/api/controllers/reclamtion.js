@@ -1,5 +1,6 @@
 
 var oracledb = require('oracledb');
+const axios = require('axios');
 
 async function run(router,connectionProperties) {
     
@@ -17,6 +18,8 @@ router.route('/reclamation/').post(function (request, response) {
       }
        
       var body = request.body;
+      const rs1 =  await axios.get('http://localhost:8089/module/'+body.module);
+      console.log(rs1.data);
      body.status= "encours"
       connection.execute("INSERT INTO ESP_RECLAMATION (ID_RECLAMATION, DESCRIPTION,MODULE,ETUDIANT,ENSEIGNANT,STATUS)"+ 
                          "VALUES(RECLAMATION_SEQ.NEXTVAL, :description,:module,:etudiant,:enseignant,:status)",
