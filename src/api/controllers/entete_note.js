@@ -1,6 +1,7 @@
 
 var oracledb = require('oracledb');
 const axios = require('axios');
+const { checkToken } = require('../middlewares/middleware');
 
 async function run(router,connectionProperties,u) {
 
@@ -124,16 +125,16 @@ async function run(router,connectionProperties,u) {
   
   
   
- router.route('/entete_note/:etudiant').get( async function  (request, response){
+ router.route('/entete_note/:etudiant').get(  async function  (request, response){
 
-  const {etudiant} = request.params
-  console.log("GET EMPLOYEES");
-  oracledb.getConnection(connectionProperties, async function (err, connection) {
-    if (err) {
-      console.error(err.message);
-      response.status(500).send("Error connecting to DB");
-      return;
-    }
+   console.log("GET EMPLOYEES");
+   oracledb.getConnection(connectionProperties, async function (err, connection) {
+     if (err) {
+       console.error(err.message);
+       response.status(500).send("Error connecting to DB");
+       return;
+      }
+      const {etudiant} = request.params
 
     const query = `SELECT * FROM ESP_NOTE WHERE etudiant = :etudiant`;
     const result = await connection.execute(query, { etudiant });
@@ -146,7 +147,7 @@ async function run(router,connectionProperties,u) {
         m = result.rows[count];
         console.log(m[1]);
         
-        const rs1 =  await axios.get('http://localhost:8089/entete_module/'+m[1]);
+        const rs1 =  await axios.get('https://localhost:8089/entete_module/'+m[1]);
         console.log("++++++");
         console.log(rs1.data);
         if(rs1.data == 'validé'){
@@ -181,7 +182,7 @@ async function run(router,connectionProperties,u) {
       }
   
       const user = result.rows[0];
-      res.send(user);
+      res.send(result.rows);
     } catch (error) {
       console.error(error);
       res.status(500).send('Internal server error');
@@ -209,7 +210,7 @@ async function run(router,connectionProperties,u) {
         return res.status(404).send('User not found');
       }
   
-      const user = result.rows[0];
+      const user = result.rows;
       res.send(user);
     } catch (error) {
       console.error(error);
@@ -238,7 +239,7 @@ router.get('/entete_cls/:id', async (req, res) => {
     }
 
     const user = result.rows[0];
-    res.send(user);
+    res.send(result.rows);
   } catch (error) {
     console.error(error);
     res.status(500).send('Internal server error');

@@ -64,19 +64,19 @@ router.route('/notes/').get(function (request, response) {
         console.log("RESULTSET:" + JSON.stringify(result));
         var employees = [];
         result.rows.forEach(function (element) {
-          employees.push({ id_note: element.CODE_NOTE, 
-                            note: element.NOTE_CC, 
-                            note: element.NOTE_TP, 
-                            note: element.NOTE_EXAMEN, 
-                            note: element.ABS_CC, 
-                            note: element.ABS_TP, 
-                            note: element.ABS_EXAMEN,   
+          employees.push({ code_note: element.CODE_NOTE, 
+                            note_cc: element.NOTE_CC, 
+                            note_tp: element.NOTE_TP, 
+                            note_examen: element.NOTE_EXAMEN, 
+                            abs_cc: element.ABS_CC, 
+                            abs_tp: element.ABS_TP, 
+                            abs_examen: element.ABS_EXAMEN,   
                            module: element.MODULE,
                           etudiant: element.ETUDIANT, 
                             });
                             console.log('iam here');
 
-                           console.log(element.ID_NOTE);
+                           console.log(element.CODE_NOTE);
         }, this);
         response.json(employees)["metaData"];
         
@@ -84,6 +84,8 @@ router.route('/notes/').get(function (request, response) {
       });
   });
 });
+
+
 
 
 /**
@@ -288,6 +290,64 @@ router.get('/notebymodule/:etudiant', async (req, res) => {
     }
   }
 });
+
+
+/**
+ * GET / 
+ * Returns a list of employees 
+ */
+router.route('/note/:id').get(function (request, response) {
+  console.log("GET ABSENCES");
+
+  const { id } = request.params;
+  oracledb.getConnection(connectionProperties, function (err, connection) {
+    if (err) {
+      console.error(err.message);
+      response.status(500).send("Error connecting to DB");
+      return;
+    }
+    console.log("After connection");
+    connection.execute("SELECT * FROM esp_note where CODE_NOTE = :id",{id},
+      { outFormat: oracledb.OBJECT },
+      function (err, result) {
+        if (err) {
+          console.error(err.message);
+          response.status(500).send("Error getting data from DB");
+          
+          return;
+        }
+        console.log('iam here');
+        console.log("RESULTSET:" + JSON.stringify(result));
+        var employees = [];
+        result.rows.forEach(function (element) {
+          employees.push({ 
+            
+            code_note: element.CODE_NOTE, 
+                            note_cc: element.NOTE_CC, 
+                            note_tp: element.NOTE_TP, 
+                            note_examen: element.NOTE_EXAMEN, 
+                            abs_cc: element.ABS_CC, 
+                            abs_tp: element.ABS_TP, 
+                            abs_examen: element.ABS_EXAMEN,   
+                           module: element.MODULE,
+                          etudiant: element.ETUDIANT, 
+                          
+                          
+                          });
+                            console.log('iam here');
+
+                           console.log(element.ETUDIANT);
+        
+        
+                          }, this);
+       
+        response.send(employees[0]).status(200);
+        
+        
+      });
+  });
+});
+
 
 
 }

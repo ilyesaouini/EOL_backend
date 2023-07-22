@@ -91,6 +91,7 @@ const register = require('./src/api/controllers/register');
 const entete_note = require('./src/api/controllers/entete_note');
 const r1 = require('./src/api/controllers/r1');
 const inscription = require('./src/api/controllers/inscription');
+const absencenew = require('./src/api/controllers/absencenew');
 
 
 //run
@@ -111,3 +112,4 @@ register.run(router,connectionProperties);
 entete_note.run(router,connectionProperties); 
 r1.run(router,connectionProperties); 
 inscription.run(router,connectionProperties); 
+absencenew.run(router,connectionProperties);

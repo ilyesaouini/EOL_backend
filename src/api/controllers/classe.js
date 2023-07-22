@@ -112,6 +112,10 @@ async function run(router,connectionProperties) {
         });
     });
   });   
+
+
+
+  
   
   
   
@@ -179,6 +183,33 @@ async function run(router,connectionProperties) {
     });
   });
   
+   //get by id ENSEIGANT
+   router.get('/classebyens/:id', async (req, res) => {
+    const { id } = req.params;
+  
+    let connection;
+  
+    try {
+      connection = await oracledb.getConnection(connectionProperties);
+  
+      const query = `SELECT * FROM ESP_PLAN_CLASS_SESSION WHERE ENSEIGNANT = :id`;
+      const result = await connection.execute(query, { id });
+  
+      if (result.rows.length === 0) {
+        return res.status(404).send('User not found');
+      }
+  
+      const user = result.rows[0];
+      res.send(user);
+    } catch (error) {
+      console.error(error);
+      res.status(500).send('Internal server error');
+    } finally {
+      if (connection) {
+        await connection.close();
+      }
+    }
+  });
   
   
   }

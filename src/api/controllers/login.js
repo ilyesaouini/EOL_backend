@@ -28,13 +28,14 @@ router.post('/login',async function(request,response, next){
       console.log(r.rows[0]);
       
       w = r.rows[0];
-      console.log(w[w.length-1]);
+      console.log(w[w.length]);
+      console.log(w[w.length-2]);
       
       const salt = await bcrypt.genSalt(10);
       const hash = await bcrypt.hash(pwd, salt);
       pass = hash;
       console.log(pass);
-      if(bcrypt.compare(w[w.length-2],pwd) ){
+      if(bcrypt.compare(w[w.length-2],pwd)){
       if(w[w.length-1] =="01"){
             const query = `SELECT * FROM ESP_ETUDIANT WHERE email = :email`;
             const result = await connection.execute(query, { email });

@@ -97,21 +97,6 @@ console.log(result);
 /*------------------EXTRA FUNCTIONS----------------*/
 //verification
 
-router.route('/verify/:id/:password').patch(function (request, response) {
-  console.log("PUT EMPLOYEE:");
-  oracledb.getConnection(connectionProperties, async function (err, connection) {
-    if (err) {
-      console.error(err.message);
-      response.status(500).send("Error connecting to DB");
-      return;
-    }
-
-  
-    
-  
-  
-  })
-})
 
 
 router.route('/modifier/:id/:password').patch(function (request, response) {

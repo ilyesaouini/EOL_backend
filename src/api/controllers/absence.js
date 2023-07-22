@@ -1,6 +1,6 @@
 
 var oracledb = require('oracledb');
-
+const axios = require('axios');
 
 async function run(router,connectionProperties) {
         
@@ -85,6 +85,54 @@ router.route('/absences/').get(function (request, response) {
 });
 
 
+
+/**
+ * GET / 
+ * Returns a list of employees 
+ */
+router.route('/absence/:id').get(function (request, response) {
+  console.log("GET ABSENCES");
+
+  const { id } = request.params;
+  oracledb.getConnection(connectionProperties, function (err, connection) {
+    if (err) {
+      console.error(err.message);
+      response.status(500).send("Error connecting to DB");
+      return;
+    }
+    console.log("After connection");
+    connection.execute("SELECT * FROM esp_absence where ID_ABSENCE = :id",{id},
+      { outFormat: oracledb.OBJECT },
+      function (err, result) {
+        if (err) {
+          console.error(err.message);
+          response.status(500).send("Error getting data from DB");
+          
+          return;
+        }
+        console.log('iam here');
+        console.log("RESULTSET:" + JSON.stringify(result));
+        var employees = [];
+        result.rows.forEach(function (element) {
+          employees.push({ id_absence: element.ID_ABSENCE, 
+                           date_absence: element.DATE_ABSENCE, 
+                           module: element.MODULE,
+                            etudiant: element.ETUDIANT });
+                            console.log('iam here');
+
+                           console.log(element.ETUDIANT);
+        
+        
+                          }, this);
+       
+        response.send(employees[0]).status(200);
+        
+        
+      });
+  });
+});
+
+
 /**
  * PUT / 
  * Update a employee 
@@ -140,6 +188,7 @@ router.get('/absence/:id', async (req, res) => {
     }
 
     const user = result.rows[0];
+    
     res.send(user);
   } catch (error) {
     console.error(error);
@@ -213,5 +262,72 @@ router.get('/absenceetudiant/:id', async (req, res) => {
       });
   });
 });
+
+router.route('/getabsences/:id').get(async function (request, response) {
+  console.log("GET ABSENCES");
+  oracledb.getConnection(connectionProperties,async function (err, connection) {
+    if (err) {
+      console.error(err.message);
+      response.status(500).send("Error connecting to DB");
+      return;
+    }
+
+
+    id = request.params.id;
+    const rs1 =  await axios.get('https://localhost:8089/user/'+id); 
+    console.log(rs1.data);
+
+    if(rs1.data == '01'){
+      console.log("absence etudiant");
+    }
+    
+    console.log("After connection");
+   
+  });
+});
+
+
+
+/**
+ * GET / 
+ * Returns a list of employees 
+ */
+router.route('/user/:id').get(function (request, response) {
+  console.log("GET ABSENCES");
+  oracledb.getConnection(connectionProperties, function (err, connection) {
+    if (err) {
+      console.error(err.message);
+      response.status(500).send("Error connecting to DB");
+      return;
+    }
+    const {id} = request.params
+    console.log("After connection");
+    connection.execute("SELECT ROLE FROM esp_user where id=:id",{id},
+      { outFormat: oracledb.OBJECT },
+      function (err, result) {
+        if (err) {
+          console.error(err.message);
+          response.status(500).send("Error getting data from DB");
+          doRelease(connection);
+          return;
+        }
+        console.log('iam here');
+        console.log("RESULTSET:" + JSON.stringify(result));
+        var employees = [];
+        result.rows.forEach(function (element) {
+          employees.push({ role: element.ROLE, 
+                            });
+                            console.log('iam here');
+
+                           console.log(element.ROLE);
+        }, this);
+       
+        response.send(employees[0]).status(200);
+        
+        
+      });
+  });
+});
+
 }
 module.exports = {run}

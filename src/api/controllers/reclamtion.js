@@ -38,6 +38,39 @@ router.route('/reclamation/').post(function (request, response) {
   });
 
 
+  /**
+   * POST / 
+   * Saves a new employee 
+   */
+router.route('/reclamationabsence/').post(function (request, response) {
+  console.log("POST ETUDIANT:");
+  oracledb.getConnection(connectionProperties, async function (err, connection) {
+    if (err) {
+      console.error(err.message);
+      response.status(500).send("Error connecting to DB");
+      return;
+    }
+     
+    var body = request.body;
+    const rs1 =  await axios.get('http://localhost:8089/module/'+body.module);
+    console.log(rs1.data);
+   body.status= "encours"
+    connection.execute("INSERT INTO ESP_RECLAMATION (ID_RECLAMATION, DESCRIPTION,MODULE,ETUDIANT,STATUS)"+ 
+                       "VALUES(RECLAMATION_SEQ.NEXTVAL, :description,:module,:etudiant,:status)",
+      [body.description,body.module,body.etudiant,body.status],
+      function (err, result) {
+        if (err) {
+          console.error(err.message);
+          response.status(500).send("Error saving employee to DB");
+          
+          return;
+        }
+        response.end();
+        
+      });
+  });
+});
+
 
 
 
@@ -183,6 +216,76 @@ router.get('/reclamation/:id', async (req, res) => {
       });
   });
 });
+
+
+
+
+    
+/**
+   * POST / 
+   * Saves a new employee 
+   */
+router.route('/reclamationsimple/').post(function (request, response) {
+  console.log("POST ETUDIANT:");
+  oracledb.getConnection(connectionProperties, async function (err, connection) {
+    if (err) {
+      console.error(err.message);
+      response.status(500).send("Error connecting to DB");
+      return;
+    }
+     
+    var body = request.body;
+   
+   body.status= "encours"
+    connection.execute("INSERT INTO ESP_RECLAMATION (ID_RECLAMATION, DESCRIPTION,ETUDIANT,STATUS)"+ 
+                       "VALUES(RECLAMATION_SEQ.NEXTVAL, :description,:etudiant,:status)",
+      [body.description,body.etudiant,body.status],
+      function (err, result) {
+        if (err) {
+          console.error(err.message);
+          response.status(500).send("Error saving employee to DB");
+          
+          return;
+        }
+        response.end();
+        
+      });
+  });
+});
+
+
+ /**
+ * update image
+ */
+
+ router.route('/reponse/').patch(function (request, response) {
+  console.log("PUT EMPLOYEE:");
+  oracledb.getConnection(connectionProperties, async function (err, connection) {
+    if (err) {
+      console.error(err.message);
+      response.status(500).send("Error connecting to DB");
+      return;
+    }
+
+    var reponse = request.body.reponse;
+    var id = request.body.id;
+    var sta = request.body.status;
+    
+    connection.execute("UPDATE ESP_RECLAMATION SET REPONSE=:reponse, STATUS=:status WHERE ID_RECLAMATION=:id",
+      [reponse,sta, id],
+      function (err, result) {
+        if (err) {
+          console.error(err.message);
+          response.status(500).send("Error updating employee to DB");
+          
+          return;
+        }
+        response.send("response send succesfuly");
+        
+      });
+  });
+});
+
 
 
 }
