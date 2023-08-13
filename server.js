@@ -92,6 +92,10 @@ const entete_note = require('./src/api/controllers/entete_note');
 const r1 = require('./src/api/controllers/r1');
 const inscription = require('./src/api/controllers/inscription');
 const absencenew = require('./src/api/controllers/absencenew');
+const entete_notenew = require('./src/api/controllers/entete_notenew');
+const notenew = require('./src/api/controllers/notenew');
+const panier = require('./src/api/controllers/panier');
+
 
 
 //run
@@ -113,3 +117,6 @@ entete_note.run(router,connectionProperties);
 r1.run(router,connectionProperties); 
 inscription.run(router,connectionProperties); 
 absencenew.run(router,connectionProperties);
+entete_notenew.run(router,connectionProperties);
+notenew.run(router,connectionProperties);
+panier.run(router,connectionProperties);

@@ -217,8 +217,8 @@ router.get('/absenceetudiant/:id', async (req, res) => {
       return res.status(404).send('ABSENCE not found');
     }
 
-    const user = result.rows[0];
-    res.send(user);
+    const user = result.rows;
+    res.send(result.rows);
   } catch (error) {
     console.error(error);
     res.status(500).send('Internal server error');

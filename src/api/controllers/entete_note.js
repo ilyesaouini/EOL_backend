@@ -2,6 +2,7 @@
 var oracledb = require('oracledb');
 const axios = require('axios');
 const { checkToken } = require('../middlewares/middleware');
+const { request } = require('express');
 
 async function run(router,connectionProperties,u) {
 
@@ -106,8 +107,8 @@ async function run(router,connectionProperties,u) {
       var body = request.body;
       var id = request.params.id;
   
-      connection.execute("UPDATE ESP_entete_note SET entete_note=:entete_note  WHERE ID_entete_note=:id",
-        [body.entete_note,  id],
+      connection.execute("UPDATE ESP_entete_note SET etat=:etat  WHERE ID_entete_note=:id",
+        [body.etat,  id],
         function (err, result) {
           if (err) {
             console.error(err.message);
@@ -146,11 +147,12 @@ async function run(router,connectionProperties,u) {
       {
         m = result.rows[count];
         console.log(m[1]);
-        
-        const rs1 =  await axios.get('https://localhost:8089/entete_module/'+m[1]);
-        console.log("++++++");
-        console.log(rs1.data);
-        if(rs1.data == 'validé'){
+        var mo =m[1]
+        const query1 = `SELECT etat FROM ESP_entete_note WHERE CODE_MODULE = :mo`;
+        const result1 = await connection.execute(query1, { mo });
+       console.log(result1.rows);
+
+        if(result1.rows == 'validé'){
           console.log(m);
           
           note.push(m);
@@ -287,7 +289,6 @@ router.get('/entete_cls/:id', async (req, res) => {
   
   
   
-
 
   }
   module.exports = {run}

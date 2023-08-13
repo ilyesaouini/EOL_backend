@@ -270,7 +270,7 @@ router.get('/notebymodule/:etudiant', async (req, res) => {
     if (result.rows.length === 0) {
       return res.status(404).send('User not found');
     }
-    const query1 = `SELECT etat FROM ESP_ENTETE_NOTE WHERE module = :modue`;
+    const query1 = `SELECT etat FROM ESP_ENTETE_NOTE WHERE module = :module`;
     const result1 = await connection.execute(query1, { m });
     
     if(result1.rows.etat == "validé"){
