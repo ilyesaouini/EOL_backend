@@ -8,7 +8,7 @@ async function run(router,connectionProperties) {
    * POST / 
    * Saves a new employee 
    */
-router.route('/absence/').post(function (request, response) {
+router.route('/postabsence/').post(function (request, response) {
     console.log("POST Absence:");
     oracledb.getConnection(connectionProperties, async function (err, connection) {
       if (err) {
@@ -20,9 +20,9 @@ router.route('/absence/').post(function (request, response) {
       var body = request.body;
       
   
-      connection.execute("INSERT INTO ESP_ABSENCE (ID_ABSENCE, DATE_ABSENCE,MODULE,ETUDIANT)"+ 
-                         "VALUES(ABSENCE_SEQ.NEXTVAL, :date_absence,:module,:etudiant)",
-        [body.date_absence, body.module, body.etudiant],
+      connection.execute("INSERT INTO ESP_ABSENCE_NEW (ID_ET,CODE_MODULE,CODE_CL,ANNEE_DEB,NUM_SEANCE,DATE_SEANCE,ID_ENS,DATE_SAISIE,UTILISATEUR,SEMESTRE,JUSTIFICATION,CODE_JUSTIF,LIB_JUSTIF,A_CONVOQUER,OBSERVATION,NEW_SEMESTRE) values"+
+    "(:id_et,:code_module,:code_cl,:annee_deb,:num_seance,:date_seance,:id_ens,:date_saisie,:utilisateur,:semestre,:justification,:code_justif,:lib_justif,a_convoquer,observation,new_semestre)",
+    [body.id_et,body.code_module,body.code_cl,body.annee_deb,body.num_seance,body.date_seance,body.id_ens,body.date_saisie,body.utilisateur,body.semestre,body.justification,body.code_justif,body.lib_justif,body.a_convoquer,body.observation,body.new_semestre],
         function (err, result) {
           if (err) {
             console.error(err.message);
@@ -36,6 +36,38 @@ router.route('/absence/').post(function (request, response) {
     });
   });
 
+
+/**
+   * POST / 
+   * Saves a new employee 
+   */
+router.route('/postabsence1/').post(function (request, response) {
+  console.log("POST Absence:");
+  oracledb.getConnection(connectionProperties, async function (err, connection) {
+    if (err) {
+      console.error(err.message);
+      response.status(500).send("Error connecting to DB");
+      return;
+    }
+     
+    var body = request.body;
+    
+
+    connection.execute("INSERT INTO ESP_ABSENCE_NEW (ID_ET,CODE_MODULE,CODE_CL,ANNEE_DEB,NUM_SEANCE,DATE_SEANCE,ID_ENS,DATE_SAISIE) values"+
+  "(:ID_ET,:CODE_MODULE,:CODE_CL,:ANNEE_DEB,:NUM_SEANCE,:DATE_SEANCE,:ID_ENS,:DATE_SAISIE)",
+  [body.ID_ET,body.CODE_MODULE,body.CODE_CL,body.ANNEE_DEB,body.NUM_SEANCE,body.DATE_SEANCE,body.ID_ENS,body.date_saisie],
+      function (err, result) {
+        if (err) {
+          console.error(err.message);
+          response.status(500).send("Error saving employee to DB");
+          
+          return;
+        }
+        response.end();
+        
+      });
+  });
+});
 
 
 

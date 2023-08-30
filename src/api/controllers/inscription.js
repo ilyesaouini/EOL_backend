@@ -45,7 +45,7 @@ async function run(router,connectionProperties) {
    * GET / 
    * Returns a list of employees 
    */
-  router.route('/inscriptions/').get(function (request, response) {
+  router.route('/inscriptions/:id').get(function (request, response) {
     console.log("GET EMPLOYEES");
   oracledb.getConnection(connectionProperties, function (err, connection) {
     if (err) {
@@ -54,7 +54,8 @@ async function run(router,connectionProperties) {
       return;
     }
     console.log("After connection");
-    connection.execute("SELECT * FROM esp_inscription",{},
+    const { id } = request.params;
+    connection.execute("SELECT * FROM esp_inscription  where etudiant = :id",{id},
       { outFormat: oracledb.OBJECT },
       function (err, result) {
         if (err) {

@@ -156,6 +156,48 @@ router.get('/etudiant/:id', async (req, res) => {
   }
 });
 
+/**
+ * GET / 
+ * Returns a list of employees 
+ */
+router.route('/etudiantbyclasse/:classe').get(function (request, response) {
+  console.log("GET EMPLOYEES");
+  oracledb.getConnection(connectionProperties, function (err, connection) {
+    if (err) {
+      console.error(err.message);
+      response.status(500).send("Error connecting to DB");
+      return;
+    }
+    console.log("After connection");
+    const { classe } = request.params;
+    connection.execute("SELECT * FROM esp_etudiant where classe = :classe",{classe},
+      { outFormat: oracledb.OBJECT },
+      function (err, result) {
+        if (err) {
+          console.error(err.message);
+          response.status(500).send("Error getting data from DB");
+          doRelease(connection);
+          return;
+        }
+        console.log('iam here');
+        console.log("RESULTSET:" + JSON.stringify(result));
+        var employees = [];
+        result.rows.forEach(function (element) {
+          employees.push({ id_etudiant: element.ID_ETUDIANT, nom_prenom: element.NOM_PRENOM, 
+                           nom: element.NOM, prenom: element.PRENOM, 
+                           email: element.EMAIL, 
+                           classe: element.CLASSE, date_de_naissance: element.DATE_DE_NAISSANCE,
+                           password: element.PASSWORD,image: element.IMAGE,tel: element.TEL,classe: element.CLASSE  });
+                            console.log('iam here');
+
+                           console.log(element.FIRSTNAME);
+        }, this);
+        response.json(employees)["metaData"];
+        
+        
+      });
+  });
+});
 
 
 

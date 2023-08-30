@@ -52,8 +52,7 @@ router.route('/reclamationabsence/').post(function (request, response) {
     }
      
     var body = request.body;
-    const rs1 =  await axios.get('http://localhost:8089/module/'+body.module);
-    console.log(rs1.data);
+    
    body.status= "encours"
     connection.execute("INSERT INTO ESP_RECLAMATION (ID_RECLAMATION, DESCRIPTION,MODULE,ETUDIANT,STATUS)"+ 
                        "VALUES(RECLAMATION_SEQ.NEXTVAL, :description,:module,:etudiant,:status)",
@@ -88,6 +87,86 @@ router.route('/reclamations/').get(function (request, response) {
     }
     console.log("After connection");
     connection.execute("SELECT * FROM ESP_RECLAMATION",{},
+      { outFormat: oracledb.OBJECT },
+      function (err, result) {
+        if (err) {
+          console.error(err.message);
+          response.status(500).send("Error getting data from DB");
+          doRelease(connection);
+          return;
+        }
+        console.log('iam here');
+        console.log("RESULTSET:" + JSON.stringify(result));
+        var employees = [];
+        result.rows.forEach(function (element) {
+          employees.push({ id_reclamation: element.ID_RECLAMATION, description: element.DESCRIPTION,
+                            reponse: element.REPONSE, 
+                           module: element.MODULE, etudiant: element.ETUDIANT, 
+                           enseignant: element.ENSEIGNANT, Rereclamation: element.RECLAMATION, 
+                           status: element.STATUS,  });
+                            console.log('iam here');
+
+                           console.log(element.ID_RECLAMATION);
+        }, this);
+        response.json(employees)["metaData"];
+        
+        
+      });
+  });
+});
+
+
+
+router.route('/reclamationsetudiant/:id').get(function (request, response) {
+  console.log("GET EMPLOYEES");
+  oracledb.getConnection(connectionProperties, function (err, connection) {
+    if (err) {
+      console.error(err.message);
+      response.status(500).send("Error connecting to DB");
+      return;
+    }
+    console.log("After connection");
+    const { id } = request.params;
+    connection.execute("SELECT * FROM ESP_RECLAMATION where etudiant = :id",{id},
+      { outFormat: oracledb.OBJECT },
+      function (err, result) {
+        if (err) {
+          console.error(err.message);
+          response.status(500).send("Error getting data from DB");
+          doRelease(connection);
+          return;
+        }
+        console.log('iam here');
+        console.log("RESULTSET:" + JSON.stringify(result));
+        var employees = [];
+        result.rows.forEach(function (element) {
+          employees.push({ id_reclamation: element.ID_RECLAMATION, description: element.DESCRIPTION,
+                            reponse: element.REPONSE, 
+                           module: element.MODULE, etudiant: element.ETUDIANT, 
+                           enseignant: element.ENSEIGNANT, Rereclamation: element.RECLAMATION, 
+                           status: element.STATUS,  });
+                            console.log('iam here');
+
+                           console.log(element.ID_RECLAMATION);
+        }, this);
+        response.json(employees)["metaData"];
+        
+        
+      });
+  });
+});
+
+router.route('/reclamationsenseignant/:id').get(function (request, response) {
+  console.log("GET EMPLOYEES");
+  oracledb.getConnection(connectionProperties, function (err, connection) {
+    if (err) {
+      console.error(err.message);
+      response.status(500).send("Error connecting to DB");
+      return;
+    }
+    console.log("After connection");
+    const { id } = request.params;
+    connection.execute("SELECT * FROM ESP_RECLAMATION where enseignant = :id",{id},
       { outFormat: oracledb.OBJECT },
       function (err, result) {
         if (err) {
@@ -287,6 +366,54 @@ router.route('/reclamationsimple/').post(function (request, response) {
 });
 
 
+
+
+
+
+
+/**
+ * GET / 
+ * Returns a list of employees 
+ */
+router.route('/reclamationetudiant/:id').get(function (request, response) {
+  console.log("GET EMPLOYEES");
+  oracledb.getConnection(connectionProperties, function (err, connection) {
+    if (err) {
+      console.error(err.message);
+      response.status(500).send("Error connecting to DB");
+      return;
+    }
+    const { id } = request.params;
+
+    console.log("After connection");
+    connection.execute("SELECT * FROM ESP_RECLAMATION where etudiant = :id",{id},
+      { outFormat: oracledb.OBJECT },
+      function (err, result) {
+        if (err) {
+          console.error(err.message);
+          response.status(500).send("Error getting data from DB");
+          doRelease(connection);
+          return;
+        }
+        console.log('iam here');
+        console.log("RESULTSET:" + JSON.stringify(result));
+        var employees = [];
+        result.rows.forEach(function (element) {
+          employees.push({ id_reclamation: element.ID_RECLAMATION, description: element.DESCRIPTION,
+                            reponse: element.REPONSE, 
+                           module: element.MODULE, etudiant: element.ETUDIANT, 
+                           enseignant: element.ENSEIGNANT, Rereclamation: element.RECLAMATION, 
+                           status: element.STATUS,  });
+                            console.log('iam here');
+
+                           console.log(element.ID_RECLAMATION);
+        }, this);
+        response.json(employees)["metaData"];
+        
+        
+      });
+  });
+});
 
 }
 module.exports = {run}

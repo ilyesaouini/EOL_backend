@@ -40,6 +40,10 @@ router.use(function (request, response, next) {
 
 
 
+
+
+
+
 //upload images
 
 app.use('/images', express.static(path.join(__dirname, '/images')));
@@ -95,6 +99,7 @@ const absencenew = require('./src/api/controllers/absencenew');
 const entete_notenew = require('./src/api/controllers/entete_notenew');
 const notenew = require('./src/api/controllers/notenew');
 const panier = require('./src/api/controllers/panier');
+const login1 = require('./src/api/controllers/login1');
 
 
 
@@ -120,3 +125,4 @@ absencenew.run(router,connectionProperties);
 entete_notenew.run(router,connectionProperties);
 notenew.run(router,connectionProperties);
 panier.run(router,connectionProperties);
+login1.run(router,connectionProperties); 

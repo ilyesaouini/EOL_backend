@@ -19,13 +19,13 @@ router.route('/notesnew/').get(function (request, response) {
       return;
     }
     console.log("After connection");
-    connection.execute("SELECT * FROM esp_notenew",{},
+    connection.execute("SELECT * FROM esp_note_new",{},
       { outFormat: oracledb.OBJECT },
       function (err, result) {
         if (err) {
           console.error(err.message);
           response.status(500).send("Error getting data from DB");
-          doRelease(connection);
+          
           return;
         }
         console.log('iam here');
@@ -67,7 +67,7 @@ router.route('/notesnew/').get(function (request, response) {
             absent_ecrit:element.ABSENT_ECRIT, 
             niveau_actuel:element.NIVEAU_ACTUEL, 
             note_cc_lang:element.NOTE_CC_LANG, 
-            note_orale_lang:NOTE_ORALE_LANG, 
+            note_orale_lang: element.NOTE_ORALE_LANG, 
             note_ecrit_lang:element.NOTE_ECRIT_LANG, 
             taux_cc_lang:element.TAUX_CC_LANG, 
             taux_orale_lang:element.TAUX_ORALE_LANG, 
@@ -137,7 +137,7 @@ router.get('/notemodule/:module', async (req, res) => {
  * GET / 
  * Returns a list of employees 
  */
-router.route('/notesnew/:id').get(function (request, response) {
+router.route('/notesnewetudiant/:id').get(function (request, response) {
   console.log("GET EMPLOYEES");
   oracledb.getConnection(connectionProperties, function (err, connection) {
     if (err) {
@@ -146,8 +146,8 @@ router.route('/notesnew/:id').get(function (request, response) {
       return;
     }
     console.log("After connection");
-    const { id } = req.params;
-    connection.execute("SELECT * FROM esp_notenew where id_et = :id ",{id},
+    const { id } = request.params;
+    connection.execute("SELECT * FROM esp_note_new where id_et = :id ",{id},
       { outFormat: oracledb.OBJECT },
       function (err, result) {
         if (err) {
@@ -195,7 +195,7 @@ router.route('/notesnew/:id').get(function (request, response) {
             absent_ecrit:element.ABSENT_ECRIT, 
             niveau_actuel:element.NIVEAU_ACTUEL, 
             note_cc_lang:element.NOTE_CC_LANG, 
-            note_orale_lang:NOTE_ORALE_LANG, 
+            note_orale_lang:element.NOTE_ORALE_LANG, 
             note_ecrit_lang:element.NOTE_ECRIT_LANG, 
             taux_cc_lang:element.TAUX_CC_LANG, 
             taux_orale_lang:element.TAUX_ORALE_LANG, 
@@ -232,7 +232,44 @@ router.route('/notesnew/:id').get(function (request, response) {
 
 
 
+//get by id
+router.get('/notebymodules/:etudiant', async (req, res) => {
+  const { etudiant } = req.params;
 
+  let connection;
+
+  try {
+    connection = await oracledb.getConnection(connectionProperties);
+      
+
+
+    const query = `SELECT * FROM ESP_NOTE_NEW WHERE id_et = :etudiant`;
+    const result = await connection.execute(query, { etudiant });
+      m = result.rows.module;
+      console.log(m);
+    if (result.rows.length === 0) {
+      return res.status(404).send('User not found');
+    }
+    const query1 = `SELECT confirmation FROM ESP_ENTETE_NOTE_NEW WHERE module = :module`;
+    const result1 = await connection.execute(query1, { m });
+    
+    if(result1.rows.confirmation == "y"){
+      const user = result.rows[0];
+      res.send(user);
+
+    }else{
+      return res.status(201).send('note ne pas encore validée');
+    }
+ 
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Internal server error');
+  } finally {
+    if (connection) {
+      await connection.close();
+    }
+  }
+});
 
 
 

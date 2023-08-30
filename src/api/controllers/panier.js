@@ -249,11 +249,11 @@ async function run(router,connectionProperties,u) {
            });
                             console.log('iam here');
 
-                           console.log(element.FIRSTNAME);
+                           console.log(element.code_cl);
         }, this);
-        response.status(200).json({
-          panier : employees
-        });
+        response.status(200).json(
+           employees
+        );
         
         
         
