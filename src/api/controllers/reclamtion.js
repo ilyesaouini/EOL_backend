@@ -1,6 +1,7 @@
 
 var oracledb = require('oracledb');
 const axios = require('axios');
+const nodemailer = require("nodemailer");
 
 async function run(router,connectionProperties) {
     
@@ -52,18 +53,25 @@ router.route('/reclamationabsence/').post(function (request, response) {
     }
      
     var body = request.body;
-    
+    var id_ens = request.body.enseignant
    body.status= "encours"
-    connection.execute("INSERT INTO ESP_RECLAMATION (ID_RECLAMATION, DESCRIPTION,MODULE,ETUDIANT,STATUS)"+ 
-                       "VALUES(RECLAMATION_SEQ.NEXTVAL, :description,:module,:etudiant,:status)",
-      [body.description,body.module,body.etudiant,body.status],
-      function (err, result) {
+    connection.execute("INSERT INTO ESP_RECLAMATION (ID_RECLAMATION, DESCRIPTION,MODULE,ETUDIANT,ENSEIGNANT,STATUS)"+ 
+                       "VALUES(RECLAMATION_SEQ.NEXTVAL, :description,:module,:etudiant,:enseignant,:status)",
+      [body.description,body.module,body.etudiant,body.enseignant,body.status],
+      async function (err, result) {
         if (err) {
           console.error(err.message);
           response.status(500).send("Error saving employee to DB");
           
           return;
+        }else{
+         const query = "select email from esp_enseignant where id_enseignant = :id_ens";
+         const usr = await connection.execute(query, { id_ens });
+         console.log(usr.rows[0]);
+         sendMailenseignant("mohamedilyess.aouini@esprit.tn");
+
         }
+
         response.end();
         
       });
@@ -346,12 +354,9 @@ router.route('/reclamationsimple/').post(function (request, response) {
       return;
     }
 
-    var reponse = request.body.reponse;
-    var id = request.body.id;
-    var sta = request.body.status;
     
     connection.execute("UPDATE ESP_RECLAMATION SET REPONSE=:reponse, STATUS=:status WHERE ID_RECLAMATION=:id",
-      [reponse,sta, id],
+      [request.body.reponse,request.body.status, request.body.id],
       function (err, result) {
         if (err) {
           console.error(err.message);
@@ -414,6 +419,33 @@ router.route('/reclamationetudiant/:id').get(function (request, response) {
       });
   });
 });
+
+
+
+function sendMailenseignant(email) {
+  var transporter = nodemailer.createTransport({
+    service: 'gmail',
+        auth: {
+        user: 'ilyesslawini@gmail.com',
+        pass: 'dsipmqcignhgsria'
+        }
+    });
+
+    var mailOptions = {
+      from: 'ilyesslawini@gmail.com',
+      to: email,
+      subject: 'Notification de reclamation',
+      text: 'Bonjour Monsieur/Madame,\n Vous avez réçu une réclamation par un(e) étudaint(e)\n Merci bien de la vérifié et rendre une réponse le plutôt possible.\n Cordialement '
+    };
+
+    transporter.sendMail(mailOptions, function(error, info){
+      if (error) {
+        console.log(error);
+      } else {
+        console.log('Email sent: ' + info.response);
+      }
+    });
+}
 
 }
 module.exports = {run}

@@ -239,7 +239,7 @@ router.route('/etudiantbyclasse/:classe').get(function (request, response) {
  * update image
  */
 
-router.route('/imageetudiant/').patch(function (request, response) {
+router.route('/imageetudiant/',upload.single('image')).patch(function (request, response) {
   console.log("PUT EMPLOYEE:");
   oracledb.getConnection(connectionProperties, async function (err, connection) {
     if (err) {
@@ -248,7 +248,7 @@ router.route('/imageetudiant/').patch(function (request, response) {
       return;
     }
 
-    var body = request.body;
+    
     var id = request.body.id;
     
 
@@ -260,6 +260,8 @@ router.route('/imageetudiant/').patch(function (request, response) {
           response.status(500).send("Error updating employee to DB");
           
           return;
+        }else{
+          response.send("success upload image");
         }
         response.end();
         

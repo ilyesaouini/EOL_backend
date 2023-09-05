@@ -24,7 +24,7 @@ oracledb.getConnection(connectionProperties,async function(err,connection){
         function (err, result) {
           if (err) {
             console.error(err.message);
-            response.status(500).send("Error saving employee to DB");
+            response.status(500).send(err.message);
             
             return;
           }
