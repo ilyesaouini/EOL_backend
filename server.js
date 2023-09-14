@@ -100,6 +100,7 @@ const entete_notenew = require('./src/api/controllers/entete_notenew');
 const notenew = require('./src/api/controllers/notenew');
 const panier = require('./src/api/controllers/panier');
 const login1 = require('./src/api/controllers/login1');
+const { request } = require('http');
 
 
 
@@ -126,3 +127,4 @@ entete_notenew.run(router,connectionProperties);
 notenew.run(router,connectionProperties);
 panier.run(router,connectionProperties);
 login1.run(router,connectionProperties); 
+

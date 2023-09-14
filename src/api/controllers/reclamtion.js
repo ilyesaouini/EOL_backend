@@ -353,10 +353,10 @@ router.route('/reclamationsimple/').post(function (request, response) {
       response.status(500).send("Error connecting to DB");
       return;
     }
-
-    
+    var body = request.body;
+    console.log(body)
     connection.execute("UPDATE ESP_RECLAMATION SET REPONSE=:reponse, STATUS=:status WHERE ID_RECLAMATION=:id",
-      [request.body.reponse,request.body.status, request.body.id],
+      [body.reponse,body.status, body.id],
       function (err, result) {
         if (err) {
           console.error(err.message);
@@ -364,6 +364,7 @@ router.route('/reclamationsimple/').post(function (request, response) {
           
           return;
         }
+        console.log("response send succesfuly")
         response.send("response send succesfuly");
         
       });

@@ -3,6 +3,40 @@ var oracledb = require('oracledb');
 async function run(router,connectionProperties){
 
 
+/**
+   * POST / 
+   * Saves a new employee 
+   */
+router.route('/postabsence1/').post(function (request, response) {
+  console.log("POST Absence:");
+  oracledb.getConnection(connectionProperties, async function (err, connection) {
+    if (err) {
+      console.error(err.message);
+      response.status(500).send("Error connecting to DB");
+      return;
+    }
+     
+    var body = request.body;
+    
+
+    connection.execute("INSERT INTO ESP_ABSENCE_NEW (ID_ET,CODE_MODULE,CODE_CL,ANNEE_DEB,NUM_SEANCE,DATE_SEANCE,ID_ENS,DATE_SAISIE) values"+
+  "(:ID_ET,:CODE_MODULE,:CODE_CL,:ANNEE_DEB,:NUM_SEANCE,:DATE_SEANCE,:ID_ENS,:DATE_SAISIE)",
+  [body.ID_ET,body.CODE_MODULE,body.CODE_CL,body.ANNEE_DEB,body.NUM_SEANCE,body.DATE_SEANCE,body.ID_ENS,body.date_saisie],
+      function (err, result) {
+        if (err) {
+          console.error(err.message);
+          response.status(500).send("Error saving employee to DB");
+          
+          return;
+        }
+        response.end();
+        
+      });
+  });
+});
+
+
+
 
     /**
      * post absence
@@ -18,11 +52,12 @@ oracledb.getConnection(connectionProperties,async function(err,connection){
     }
     var body = request.body;
     console.log("body is :"+body);
-    connection.execute("INSERT INTO ESP_ABSENCE_NEW (ID_ET,CODE_MODULE,CODE_CL,ANNEE_DEB,NUM_SEANCE,DATE_SEANCE,ID_ENS,DATE_SAISIE,UTILISATEUR,SEMESTRE,JUSTIFICATION,CODE_JUSTIF,LIB_JUSTIF,A_CONVOQUER,OBSERVATION,NEW_SEMESTRE) values"+
-    "(:id_et,:code_module,:code_cl,:annee_deb,:num_seance,:date_seance,:id_ens,:date_saisie,:utilisateur,:semestre,:justification)",
-    [body.id_et,body.code_module,body.code_cl,body.annee_deb,body.num_seance,body.date_seance,body.id_ens,body.date_saisie,body.utilisateur,body.semestre,body.justification],
+    connection.execute("INSERT INTO ESP_ABSENCE_NEW (id_et,code_module,code_cl,annee_deb,num_seance,date_seance,id_ens) values"+
+    "(:id_et,:code_module,:code_cl,:annee_deb,:num_seance,:date_seance,:id_ens)",
+    [body.id_et,body.code_module,body.code_cl,body.annee_deb,body.num_seance,body.date_seance,body.id_ens],
         function (err, result) {
           if (err) {
+            console.log("ssss")
             console.error(err.message);
             response.status(500).send(err.message);
             
@@ -35,6 +70,21 @@ oracledb.getConnection(connectionProperties,async function(err,connection){
 
 });
 
+router.route('addabsence1/').post(function(request,response){
+  console.log("post absence");
+  oracledb.getConnection(connectionProperties,async function(err,connection){
+  
+      if(err){
+          con.error(err.message);
+          response.status(500).send("error connection to db");
+          return;
+      }
+      var body = request.body;
+      console.log("body is :"+body);
+      const query = 'INSERT INTO ESP_ABSENCE_NEW (ID_ET,CODE_MODULE,CODE_CL,ANNEE_DEB,NUM_SEANCE,DATE_SEANCE,ID_ENS,DATE_SAISIE,UTILISATEUR,SEMESTRE,JUSTIFICATION,CODE_JUSTIF,LIB_JUSTIF,A_CONVOQUER,OBSERVATION,NEW_SEMESTRE) values(?)';
+    connection.execute(query, body);
+    })
+  });
 
 
 
