@@ -1,14 +1,14 @@
 
 var oracledb = require('oracledb');
 
-async function run(router,connectionProperties,upload) {
+async function run(router,connectionProperties,uploadpdf) {
 
 
   /**
      * POST / 
      * Saves a new employee 
      */
-  router.route('/emploi/',upload.single('image')).post(function (request, response) {
+  router.route('/emploi/',uploadpdf.single('emploi')).post(function (request, response) {
       console.log("POST ETUDIANT:");
       oracledb.getConnection(connectionProperties, async function (err, connection) {
         if (err) {
@@ -21,8 +21,8 @@ async function run(router,connectionProperties,upload) {
         
     
         connection.execute("INSERT INTO ESP_EMPLOI (ID_EMPLOI, EMPLOI)"+ 
-                           "VALUES(EMPLOI_SEQ.NEXTVAL, :emploi)",
-          [ body.emploi],
+        "VALUES(EMPLOI_SEQ.NEXTVAL, :emploi)",
+[ body.emploi],
           function (err, result) {
             if (err) {
               console.error(err.message);

@@ -39,6 +39,30 @@ router.use(function (request, response, next) {
 });
 
 
+//upload pdf
+
+app.use('/emplois', express.static(path.join(__dirname, '/emplois')));
+
+
+const astorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, './emplois');
+    },
+    filename: (req, file, cb) => {
+        console.log(file);
+        cb(null, req.body.image + path.extname(file.originalname));
+    }
+});
+const pdffileFilter = (req, file, cb) => {
+    if (file.mimetype == 'pdf') {
+        cb(null, true);
+    } else {
+        cb(null, false);
+    }
+}
+
+  
+const uploadpdf = multer({ storage: astorage, fileFilter: pdffileFilter });
 
 
 
@@ -68,6 +92,10 @@ const fileFilter = (req, file, cb) => {
 
   
 const upload = multer({ storage: storage, fileFilter: fileFilter });
+
+
+
+
 
 
 app.use(bodyParser.json({limit: '5mb'}));
@@ -100,7 +128,7 @@ const entete_notenew = require('./src/api/controllers/entete_notenew');
 const notenew = require('./src/api/controllers/notenew');
 const panier = require('./src/api/controllers/panier');
 const login1 = require('./src/api/controllers/login1');
-const { request } = require('http');
+
 
 
 
@@ -110,7 +138,7 @@ absence.run(router,connectionProperties);
 admin.run(router,connectionProperties,upload); 
 annee.run(router,connectionProperties); 
 classe.run(router,connectionProperties); 
-emploi.run(router,connectionProperties,upload); 
+emploi.run(router,connectionProperties,uploadpdf); 
 etudiant.run(router,connectionProperties,upload); 
 enseignant.run(router,connectionProperties,upload); 
 module1.run(router,connectionProperties); 
