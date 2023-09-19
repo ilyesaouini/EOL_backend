@@ -68,7 +68,7 @@ router.route('/reclamationabsence/').post(function (request, response) {
          const query = "select email from esp_enseignant where id_enseignant = :id_ens";
          const usr = await connection.execute(query, { id_ens });
          console.log(usr.rows[0]);
-         sendMailenseignant("mohamedilyess.aouini@esprit.tn");
+         sendMailenseignant(usr.rows[0]);
 
         }
 
@@ -423,20 +423,27 @@ router.route('/reclamationetudiant/:id').get(function (request, response) {
 
 
 
-function sendMailenseignant(email) {
+  async function sendMailenseignant(email) {
+  //select mail and password from base to send mail
+  console.log("GET ABSENCES");
+  const q = `SELECT * FROM esp_parametres  `;
+      const r = await connection.execute(q);
+console.log(r)
+
+
   var transporter = nodemailer.createTransport({
     service: 'gmail',
         auth: {
-        user: 'ilyesslawini@gmail.com',
-        pass: 'dsipmqcignhgsria'
+        user: r.rows[0][0],
+        pass: r.rows[0][1]
         }
     });
 
     var mailOptions = {
-      from: 'ilyesslawini@gmail.com',
+      from: r.rows[0][0],
       to: email,
       subject: 'Notification de reclamation',
-      text: 'Bonjour Monsieur/Madame,\n Vous avez réçu une réclamation par un(e) étudaint(e)\n Merci bien de la vérifié et rendre une réponse le plutôt possible.\n Cordialement '
+      text: 'Bonjour Monsieur/Madame,\n Vous avez réçu une réclamation par un(e) étudiant(e)\n Merci bien de la vérifié et rendre une réponse le plutôt possible.\n Cordialement '
     };
 
     transporter.sendMail(mailOptions, function(error, info){

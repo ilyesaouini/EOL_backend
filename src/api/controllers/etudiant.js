@@ -4,7 +4,7 @@ var oracledb = require('oracledb');
 const bcrypt = require('bcrypt');
 
 
-async function run(router,connectionProperties,upload) {
+async function run(router,connectionProperties,uploadimage) {
 
 
 /**
@@ -239,7 +239,7 @@ router.route('/etudiantbyclasse/:classe').get(function (request, response) {
  * update image
  */
 
-router.route('/imageetudiant/',upload.single('image')).patch(function (request, response) {
+router.route('/imageetudiant/',uploadimage.single('image')).patch(function (request, response) {
   console.log("PUT EMPLOYEE:");
   oracledb.getConnection(connectionProperties, async function (err, connection) {
     if (err) {

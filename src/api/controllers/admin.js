@@ -5,7 +5,7 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require('bcrypt');
 
 
-async function run(router,connectionProperties,upload) {
+async function run(router,connectionProperties,uploadimage) {
 
 
     /**

@@ -41,29 +41,27 @@ router.use(function (request, response, next) {
 
 //upload pdf
 
-app.use('/emplois', express.static(path.join(__dirname, '/emplois')));
-
-
-const astorage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, './emplois');
+var storage = multer.diskStorage({
+    destination: function (req, file, callback) {
+        var dir = './uploads';
+        if (!fs.existsSync(dir)){
+            fs.mkdirSync(dir);
+        }
+        callback(null, dir);
     },
-    filename: (req, file, cb) => {
-        console.log(file);
-        cb(null, req.body.image + path.extname(file.originalname));
+    filename: function (req, file, callback) {
+        callback(null, file.originalname);
     }
 });
-const pdffileFilter = (req, file, cb) => {
-    if (file.mimetype == 'pdf') {
-        cb(null, true);
-    } else {
-        cb(null, false);
-    }
-}
-
-  
-const uploadpdf = multer({ storage: astorage, fileFilter: pdffileFilter });
-
+var upload = multer({storage: storage}).array('files', 12);
+app.post('/upload', function (req, res, next) {
+    upload(req, res, function (err) {
+        if (err) {
+            return res.end("Something went wrong:(");
+        }
+        res.end("Upload completed.");
+    });
+})
 
 
 
@@ -73,7 +71,7 @@ const uploadpdf = multer({ storage: astorage, fileFilter: pdffileFilter });
 app.use('/images', express.static(path.join(__dirname, '/images')));
 
 
-const storage = multer.diskStorage({
+const storage1 = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, './images');
     },
@@ -91,7 +89,7 @@ const fileFilter = (req, file, cb) => {
 }
 
   
-const upload = multer({ storage: storage, fileFilter: fileFilter });
+const uploadimage = multer({ storage: storage1, fileFilter: fileFilter });
 
 
 
@@ -128,19 +126,20 @@ const entete_notenew = require('./src/api/controllers/entete_notenew');
 const notenew = require('./src/api/controllers/notenew');
 const panier = require('./src/api/controllers/panier');
 const login1 = require('./src/api/controllers/login1');
+const parametre = require('./src/api/controllers/parametre');
 
 
 
 
 //run
-user.run(router,connectionProperties,upload); 
+user.run(router,connectionProperties); 
 absence.run(router,connectionProperties); 
-admin.run(router,connectionProperties,upload); 
+admin.run(router,connectionProperties,uploadimage); 
 annee.run(router,connectionProperties); 
 classe.run(router,connectionProperties); 
-emploi.run(router,connectionProperties,uploadpdf); 
-etudiant.run(router,connectionProperties,upload); 
-enseignant.run(router,connectionProperties,upload); 
+emploi.run(router,connectionProperties); 
+etudiant.run(router,connectionProperties,uploadimage); 
+enseignant.run(router,connectionProperties,uploadimage); 
 module1.run(router,connectionProperties); 
 note.run(router,connectionProperties);
 reclamation.run(router,connectionProperties); 
@@ -154,5 +153,6 @@ absencenew.run(router,connectionProperties);
 entete_notenew.run(router,connectionProperties);
 notenew.run(router,connectionProperties);
 panier.run(router,connectionProperties);
-login1.run(router,connectionProperties); 
+login1.run(router,connectionProperties);
+parametre.run(router,connectionProperties); 
 

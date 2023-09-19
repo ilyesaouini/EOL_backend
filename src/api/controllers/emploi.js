@@ -1,14 +1,32 @@
 
 var oracledb = require('oracledb');
-
-async function run(router,connectionProperties,uploadpdf) {
+const multer = require('multer');
+var express = require('express');
+var app = express();
+var bodyParser = require('body-parser');
+app.use(bodyParser.json({limit: '50mb'}));
+app.use(bodyParser.urlencoded({limit: '50mb', extended: true, parameterLimit: 1000000}));
+async function run(router,connectionProperties,upload) {
 
 
   /**
      * POST / 
      * Saves a new employee 
      */
-  router.route('/emploi/',uploadpdf.single('emploi')).post(function (request, response) {
+  var storage = multer.diskStorage({
+    destination: function (req, file, callback) {
+        var dir = '../emplois';
+        if (!fs.existsSync(dir)){
+            fs.mkdirSync(dir);
+        }
+        callback(null, dir);
+    },
+    filename: function (req, file, callback) {
+        callback(null, file.originalname);
+    }
+});
+var upload = multer({storage: storage}).array('emploi', 12);
+  router.route('/emploi/',upload).post(function (request, response) {
       console.log("POST ETUDIANT:");
       oracledb.getConnection(connectionProperties, async function (err, connection) {
         if (err) {
@@ -20,9 +38,9 @@ async function run(router,connectionProperties,uploadpdf) {
         var body = request.body;
         
     
-        connection.execute("INSERT INTO ESP_EMPLOI (ID_EMPLOI, EMPLOI)"+ 
-        "VALUES(EMPLOI_SEQ.NEXTVAL, :emploi)",
-[ body.emploi],
+        connection.execute("INSERT INTO ESP_EMPLOI ( EMPLOI)"+ 
+        " :emploi)",
+[ body],
           function (err, result) {
             if (err) {
               console.error(err.message);
@@ -179,6 +197,9 @@ async function run(router,connectionProperties,uploadpdf) {
     });
   });
   
+  
+
+
   
   
   }
