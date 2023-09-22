@@ -42,7 +42,9 @@ router.use(function (request, response, next) {
 
 
 //upload pdf
-
+/**
+ * 
+ 
 var storage = multer.diskStorage({
     destination: function (req, file, callback) {
         var dir = './emplois';
@@ -67,10 +69,11 @@ app.post('/upload', function (req, res, next) {
             }
              
             var body = req.body;
-           
+           console.log("********")
             console.log(body);
             connection.execute("INSERT INTO ESP_EMPLOI (ID_EMPLOI, EMPLOI)values " + 
             "(EMPLOI_SEQ :emploi)",
+
     [ body],
               function (err, result) {
                 if (err) {
@@ -91,6 +94,66 @@ app.post('/upload', function (req, res, next) {
 })
 
 
+*/
+
+
+
+
+
+
+var storage = multer.diskStorage({
+    destination: function (req, file, callback) {
+        var dir = '../emplois';
+        if (!fs.existsSync(dir)){
+            fs.mkdirSync(dir);
+        }
+        callback(null, dir);
+    },
+    filename: function (req, file, callback) {
+        callback(null, file.originalname);
+    }
+});
+app.set('view engine', 'ejs');
+
+app.get('/', (req, res) => {
+    res.render('index');
+});
+
+
+var upload = multer({storage: storage}).array('files', 12);
+app.post('/upload', function (req, res, next) {
+    upload(req, res, function (err) {
+        if (err) {
+            return res.end("Something went wrong:(");
+        }
+        res.end("Upload completed.");
+    });
+})
+
+
+/**
+ * upload file
+ */
+
+const uploadfile = multer({
+    dest: "../emplois/",
+
+});
+app.post("/uploadfile",uploadfile.single('file'),(req,res)=>{
+    res.json({
+        message :"file uploaded"
+    });
+})
+
+
+
+
+
+
+
+
+
+
 
 
 //upload images
@@ -100,7 +163,7 @@ app.use('/images', express.static(path.join(__dirname, '/images')));
 
 const storage1 = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, './images');
+        cb(null, '../images');
     },
     filename: (req, file, cb) => {
         console.log(file);
