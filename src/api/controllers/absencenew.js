@@ -1,3 +1,4 @@
+const { json } = require('body-parser');
 var oracledb = require('oracledb');
 
 async function run(router,connectionProperties){
@@ -256,48 +257,57 @@ router.get('/absenseignant/:id', async (req, res) => {
 
 
 //get by id
-router.get('/absenseignantclasse/:id/:classe/:module', async (req, res) => {
+router.get('/absenseignantclasse/:classe/:module/:id', async (req, res) => {
   const { id } = req.params;
   const { classe } = req.params;
   const { module } = req.params;
 
   let connection;
 
-  try {
-    connection = await oracledb.getConnection(connectionProperties);
-
-    const query = `SELECT * FROM ESP_ABSENCE_NEW WHERE ID_ENS = :id and code_cl=:classe and code_module=: module `;
-    const result = await connection.execute(query, { id,classe,module });
-
-    if (result.rows.length === 0) {
-      return res.status(404).send('ABSENCE not found');
+  console.log("GET ABSENCES");
+  oracledb.getConnection(connectionProperties, function (err, connection) {
+    if (err) {
+      console.error(err.message);
+      response.status(500).send("Error connecting to DB");
+      return;
     }
+    console.log("After connection");
+    connection.execute("SELECT * FROM esp_absence_new where code_cl = :classe and code_module =: module and id_ens=:id ",{classe,module,id},
+      { outFormat: oracledb.OBJECT },
+      function (err, result) {
+        if (err) {
+          console.error(err.message);
+          response.status(500).send("Error getting data from DB");
+          doRelease(connection);
+          return;
+        }
+        console.log('iam here');
+        console.log("RESULTSET:" + JSON.stringify(result));
+        var employees = [];
+        result.rows.forEach(function (element) {
+          employees.push({ id_et: element.ID_ET, 
+            code_module: element.CODE_MODULE, 
+            code_cl: element.CODE_CL, 
+            id_ens: element.ID_ENS,
+            annee:element.ANNEE_DEB,
+            num_seance:element.NUM_SEANCE,
+            date_seance:element.DATE_SEANCE,
+            semestre:element.SEMESTRE });
+                            console.log('iam here');
 
-    const user = result.rows;
-    res.send(result.rows);
-  } catch (error) {
-    console.error(error);
-    res.status(500).send('Internal server error');
-  } finally {
-    if (connection) {
-      await connection.close();
-    }
-  }
+                           console.log(element.ID_ET);
+        }, this);
+       
+        res.status(200).json({
+          absence : employees
+        });
+        
+        
+      });
 });
-}
+},)}
 
 module.exports ={run}
 
 
 
-
-/*
-id_et: element.ID_ET, 
-                             code_module: element.CODE_MODULE, 
-                             code_cl: element.CODE_CL, 
-                             id_ens: element.ID_ENS,
-                             annee:element.ANNEE_DEB,
-                             num_seance:element.NUM_SEANCE,
-                             date_seance:element.DATE_SEANCE,
-                             semestre:element.SEMESTRE
-                             */

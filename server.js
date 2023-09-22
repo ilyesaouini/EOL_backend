@@ -5,8 +5,10 @@ const path = require('path');
 const multer = require('multer');
 const bodyparser = require('body-parser');
 app.use(bodyparser.json());
+app.use(bodyparser.urlencoded({extended:true,parameterLimit:1000000,limit:"500mb"}));
 var oracledb = require('oracledb');
 oracledb.autoCommit = true;
+//Set Request Size Limit
 
 var connectionProperties = {
   user: process.env.DBAAS_USER_NAME || "admin",
@@ -43,9 +45,10 @@ router.use(function (request, response, next) {
 
 var storage = multer.diskStorage({
     destination: function (req, file, callback) {
-        var dir = './uploads';
+        var dir = './emplois';
         if (!fs.existsSync(dir)){
             fs.mkdirSync(dir);
+        
         }
         callback(null, dir);
     },
@@ -53,9 +56,33 @@ var storage = multer.diskStorage({
         callback(null, file.originalname);
     }
 });
-var upload = multer({storage: storage}).array('files', 12);
+var upload = multer({storage: storage}).array('emploi', 12);
 app.post('/upload', function (req, res, next) {
     upload(req, res, function (err) {
+        oracledb.getConnection(connectionProperties, async function (err, connection) {
+            if (err) {
+              console.error(err.message);
+              response.status(500).send("Error connecting to DB");
+              return;
+            }
+             
+            var body = req.body;
+           
+            console.log(body);
+            connection.execute("INSERT INTO ESP_EMPLOI (ID_EMPLOI, EMPLOI)values " + 
+            "(EMPLOI_SEQ :emploi)",
+    [ body],
+              function (err, result) {
+                if (err) {
+                  console.error(err.message);
+                  res.status(500).send("Error saving employee to DB");
+                  
+                  return;
+                }
+                res.end();
+                
+              });
+          });
         if (err) {
             return res.end("Something went wrong:(");
         }
@@ -155,4 +182,5 @@ notenew.run(router,connectionProperties);
 panier.run(router,connectionProperties);
 login1.run(router,connectionProperties);
 parametre.run(router,connectionProperties); 
+
 
