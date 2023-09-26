@@ -3,6 +3,7 @@ var app = express();
 var bodyParser = require('body-parser');
 const path = require('path');
 const multer = require('multer');
+var fs  = require('fs');
 const bodyparser = require('body-parser');
 app.use(bodyparser.json());
 app.use(bodyparser.urlencoded({extended:true,parameterLimit:1000000,limit:"500mb"}));
@@ -20,8 +21,8 @@ var connectionProperties = {
 
 // configure app to use bodyParser()
 // this will let us get the data from a POST
-app.use(bodyParser.urlencoded({ extended: true,limit: '5mb' }));
-app.use(bodyParser.json({ type: '*/*',limit:'50mb' }));
+//app.use(bodyParser.urlencoded({ extended: true,limit: '5mb' }));
+//app.use(bodyParser.json({ type: '*/*',limit:'50mb' }));
 
 
 
@@ -41,109 +42,79 @@ router.use(function (request, response, next) {
 });
 
 
-//upload pdf
-/**
- * 
- 
-var storage = multer.diskStorage({
-    destination: function (req, file, callback) {
-        var dir = './emplois';
-        if (!fs.existsSync(dir)){
-            fs.mkdirSync(dir);
-        
-        }
-        callback(null, dir);
-    },
-    filename: function (req, file, callback) {
-        callback(null, file.originalname);
-    }
-});
-var upload = multer({storage: storage}).array('emploi', 12);
-app.post('/upload', function (req, res, next) {
-    upload(req, res, function (err) {
-        oracledb.getConnection(connectionProperties, async function (err, connection) {
-            if (err) {
-              console.error(err.message);
-              response.status(500).send("Error connecting to DB");
-              return;
-            }
-             
-            var body = req.body;
-           console.log("********")
-            console.log(body);
-            connection.execute("INSERT INTO ESP_EMPLOI (ID_EMPLOI, EMPLOI)values " + 
-            "(EMPLOI_SEQ :emploi)",
-
-    [ body],
-              function (err, result) {
-                if (err) {
-                  console.error(err.message);
-                  res.status(500).send("Error saving employee to DB");
-                  
-                  return;
-                }
-                res.end();
-                
-              });
-          });
-        if (err) {
-            return res.end("Something went wrong:(");
-        }
-        res.end("Upload completed.");
-    });
-})
-
-
-*/
 
 
 
 
-
-
-var storage = multer.diskStorage({
-    destination: function (req, file, callback) {
-        var dir = '../emplois';
-        if (!fs.existsSync(dir)){
-            fs.mkdirSync(dir);
-        }
-        callback(null, dir);
-    },
-    filename: function (req, file, callback) {
-        callback(null, file.originalname);
-    }
-});
-app.set('view engine', 'ejs');
-
-app.get('/', (req, res) => {
-    res.render('index');
-});
-
-
-var upload = multer({storage: storage}).array('files', 12);
-app.post('/upload', function (req, res, next) {
-    upload(req, res, function (err) {
-        if (err) {
-            return res.end("Something went wrong:(");
-        }
-        res.end("Upload completed.");
-    });
-})
 
 
 /**
  * upload file
  */
 
-const uploadfile = multer({
-    dest: "../emplois/",
 
+app.set('view engine', 'ejs');
+
+app.get('/', (req, res) => {
+    res.render('index');
 });
-app.post("/uploadfile",uploadfile.single('file'),(req,res)=>{
-    res.json({
-        message :"file uploaded"
-    });
-})
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+      cb(null, "./uploads")
+    },
+    filename: (req, file, cb) => {
+      cb(null, file.originalname)
+    },
+  })
+  
+  const uploadStorage = multer({ storage: storage })
+  
+  // Single file
+  app.post("/upload/single", uploadStorage.single("file"), (req, res) => {
+    console.log("POST ETUDIANT:");
+    oracledb.getConnection(connectionProperties, async function (err, connection) {
+        if (err) {
+          console.error(err.message);
+          response.status(500).send("Error connecting to DB");
+          return;
+        }
+         
+    console.log(req.file);
+    console.log("==================================================");
+    console.log("Current directory :", __dirname);
+    console.log("==================================================");
+    console.log("File path :", req.file.path);
+    
+        
+        
+    
+        connection.execute("INSERT INTO ESP_EMPLOI (ID_EMPLOI, EMPLOI,NAME,TYPE)values " + 
+        "(EMPLOI_SEQ.NEXTVAL, :emploi,:name,:type)",
+          [ req.file.path, req.file.originalname,"pdf"],
+          function (err, result) {
+            if (err) {
+              console.error(err.message);
+              res.status(500).send("Error saving employee to DB");
+              
+              return;
+            }
+            res.end();
+            
+          });
+      });
+      
+    return res.send("Single file uploaded")
+  })
+  
+  //Multiple files
+  app.post("/upload/multiple", uploadStorage.array("files", 10), (req, res) => {
+    console.log(req.files)
+    return res.send("Multiple files uploaded")
+  })
+
+
+
 
 
 

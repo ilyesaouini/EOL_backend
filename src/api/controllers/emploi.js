@@ -1,12 +1,11 @@
-
+const fs = require("fs");
 var oracledb = require('oracledb');
 const multer = require('multer');
 var express = require('express');
 var app = express();
 var bodyParser = require('body-parser');
-app.use(bodyParser.json({limit: '50mb'}));
-app.use(bodyParser.urlencoded({limit: '50mb', extended: true, parameterLimit: 1000000}));
-async function run(router,connectionProperties) {
+
+async function run(router,connectionProperties,uploadStorage) {
 
 
   /**
@@ -16,6 +15,7 @@ async function run(router,connectionProperties) {
   
   router.route('/emploi/').post(function (request, response) {
       console.log("POST ETUDIANT:");
+      console.log(request.emploi)
       oracledb.getConnection(connectionProperties, async function (err, connection) {
         if (err) {
           console.error(err.message);
@@ -23,12 +23,12 @@ async function run(router,connectionProperties) {
           return;
         }
          
-        var body = request.body;
-        
+        var body = request.emploi;
+        console.log(body)
     
         connection.execute("INSERT INTO ESP_EMPLOI (ID_EMPLOI, EMPLOI)values " + 
-        "(EMPLOI_SEQ.NEXTVAL :emploi)",
-[ body],
+        "(EMPLOI_SEQ.NEXTVAL, :emploi)",
+          [ body],
           function (err, result) {
             if (err) {
               console.error(err.message);
@@ -36,6 +36,7 @@ async function run(router,connectionProperties) {
               
               return;
             }
+            response.send("done");
             response.end();
             
           });
@@ -60,23 +61,26 @@ async function run(router,connectionProperties) {
         return;
       }
       console.log("After connection");
-      connection.execute("SELECT * FROM esp_emploi",{},
+      connection.execute("SELECT * FROM esp_emploi ",{},
         { outFormat: oracledb.OBJECT },
         function (err, result) {
           if (err) {
             console.error(err.message);
             response.status(500).send("Error getting data from DB");
-            doRelease(connection);
+            
             return;
           }
           console.log('iam here');
           console.log("RESULTSET:" + JSON.stringify(result));
           var employees = [];
           result.rows.forEach(function (element) {
-            employees.push({ id_emploi: element.ID_EMPLOI, emploi: element.EMPLOI });
+            employees.push({ id_emploi: element.ID_EMPLOI, 
+                path: element.EMPLOI,
+                name:element.NAME,
+              emploi: fs.readFileSync(element.EMPLOI,{encoding:"base64"}) });
                               console.log('iam here');
   
-                             console.log(element.FIRSTNAME);
+                             console.log(fs.readFileSync(element.EMPLOI,{encoding:"base64"}));
           }, this);
           response.json(employees)["metaData"];
           
