@@ -4,7 +4,7 @@ const config = require("./../../config/config");
 const bcrypt = require('bcrypt');
 const nodemailer = require("nodemailer");
 const axios = require('axios');
-async function run(router,connectionProperties,upload) {
+async function run(router,connectionProperties) {
 
   
 router.route('/register1').patch(function (request, response) {
@@ -36,22 +36,7 @@ router.route('/register1').patch(function (request, response) {
       
       sendMail("https://86d7-196-234-144-33.eu.ngrok.io/modifier/"+r.rows[0][0],hash,email.toString());
       
-      /*
-      connection.execute("UPDATE ESP_USER SET PASSWORD=:password WHERE ID=:id",
-      [body.password, idc],
-      async function (err, result) {
-        if (err) {
-          console.error(err.message);
-          response.status(500).send("Error updating employee to DB");
-          
-          
-          return;
-        }
-console.log(result);
-       
-      }
-      );
-        */
+     
     if(r.rows.role = "01"){
       connection.execute("UPDATE ESP_ETUDIANT SET PASSWORD=:password WHERE Email=:email",
         [body.password, email],
@@ -156,6 +141,9 @@ router.route('/modifier/:id/:password').patch(function (request, response) {
   
   
   
+  
+
+
   
   
 }

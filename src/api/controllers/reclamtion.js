@@ -425,6 +425,17 @@ router.route('/reclamationetudiant/:id').get(function (request, response) {
 
   async function sendMailenseignant(email) {
   //select mail and password from base to send mail
+  
+  oracledb.getConnection(connectionProperties, async function (err, connection) {
+    if (err) {
+      console.error(err.message);
+      response.status(500).send("Error connecting to DB");
+      return;
+    }
+  
+
+
+
   console.log("GET ABSENCES");
   const q = `SELECT * FROM esp_parametres  `;
       const r = await connection.execute(q);
@@ -453,6 +464,8 @@ console.log(r)
         console.log('Email sent: ' + info.response);
       }
     });
+
+  })
 }
 
 }

@@ -241,26 +241,32 @@ router.get('/notebymodules/:etudiant', async (req, res) => {
   try {
     connection = await oracledb.getConnection(connectionProperties);
       
+    const auto = `SELECT etat_note FROM ESP_AUTORISATION`;
+    const resu = await connection.execute(auto );
+    console.log(resu.rows[0][0]);
+    if(resu.rows[0][0]==0){
 
-
-    const query = `SELECT * FROM ESP_NOTE_NEW WHERE id_et = :etudiant`;
-    const result = await connection.execute(query, { etudiant });
-      m = result.rows.module;
+      const query = `SELECT * FROM ESP_NOTE_NEW WHERE id_et = :etudiant`;
+      const result = await connection.execute(query, { etudiant });
+      m = result.rows[0][0];
       console.log(m);
-    if (result.rows.length === 0) {
-      return res.status(404).send('User not found');
+      if (result.rows.length === 0) {
+        return res.status(404).send('User not found');
     }
-    const query1 = `SELECT confirmation FROM ESP_ENTETE_NOTE_NEW WHERE module = :module`;
+    const query1 = `SELECT confirmation FROM ESP_ENTETE_NOTE_NEW WHERE code_module = :m`;
     const result1 = await connection.execute(query1, { m });
-    
-    if(result1.rows.confirmation == "y"){
+    console.log(result1.rows[0])
+    if(result1.rows[0] == "y"){
       const user = result.rows[0];
       res.send(user);
 
     }else{
       return res.status(201).send('note ne pas encore validée');
     }
- 
+    
+  }else{
+    return res.status(201).send('note ne pas encore validée');
+  }
   } catch (error) {
     console.error(error);
     res.status(500).send('Internal server error');
@@ -272,6 +278,120 @@ router.get('/notebymodules/:etudiant', async (req, res) => {
 });
 
 
+
+
+
+//get by id
+router.get('/listenotebymodules/:etudiant', async (req, res) => {
+  const { etudiant } = req.params;
+  let connection;
+
+  try {
+    connection = await oracledb.getConnection(connectionProperties);
+    const auto = `SELECT etat_note FROM ESP_AUTORISATION`;
+    const resu = await connection.execute(auto );
+    console.log(resu.rows[0][0]);
+    if(resu.rows[0][0]==1){
+
+
+      const query = `SELECT * FROM ESP_NOTE_NEW WHERE id_et = :etudiant`;
+    const result = await connection.execute(query, { etudiant });
+    var liste =[];
+    
+    if (result.rows.length === 0) {
+      return res.status(404).send('User not found');
+    }else{
+
+      for(
+        var i=0;i<= result.rows.length-1;i++
+        ){ 
+          m = result.rows[i];
+           console.log(m?.[0]);
+          
+           etat = m?.[0]
+           console.log("module"+etat)
+          
+           const query1 = `SELECT confirmation FROM ESP_ENTETE_NOTE_NEW WHERE code_module = :etat`;
+          const result1 = await connection.execute(query1, {etat });
+          if(result1.rows[0] == "y"){
+            //liste = liste+  result.rows[i];
+           // liste.push(result.rows[i]);
+            liste.push({
+              code_module:result.rows[i]?.[0], 
+            num_panier:result.rows[i]?.[1], 
+            code_cl:result.rows[i]?.[2], 
+            annee_deb:result.rows[i]?.[3], 
+            annee_fin:result.rows[i]?.[4], 
+            id_et:result.rows[i]?.[5], 
+            type_note:result.rows[i]?.[6], 
+            nature_note:result.rows[i]?.[7], 
+            taux_note:result.rows[i]?.[8], 
+            observation:result.rows[i]?.[9], 
+            date_deroulement:result.rows[i]?.[10], 
+            semestre:result.rows[i]?.[11], 
+            id_ens:result.rows[i]?.[12], 
+            nbr_heure:result.rows[i]?.[13], 
+            type_session:result.rows[i]?.[14], 
+            note_exam:result.rows[i]?.[15], 
+            note_cc:result.rows[i]?.[16], 
+            note_tp:result.rows[i]?.[17], 
+            note_ratrap:result.rows[i]?.[18], 
+            absent:result.rows[i]?.[19], 
+            absent_tp:result.rows[i]?.[20], 
+            absent_exam:result.rows[i]?.[21], 
+            absent_cc:result.rows[i]?.[22], 
+            utilisateur:result.rows[i]?.[23], 
+            numpromotioncs:result.rows[i]?.[24], 
+            niv_acquis_anglais:result.rows[i]?.[25], 
+            niveau_acquis:result.rows[i]?.[26], 
+            note_orale:result.rows[i]?.[27], 
+            note_ecrit:result.rows[i]?.[28], 
+            dispense:result.rows[i]?.[29], 
+            absent_orale:result.rows[i]?.[30], 
+            absent_ecrit:result.rows[i]?.[31], 
+            niveau_actuel:result.rows[i]?.[32], 
+            note_cc_lang:result.rows[i]?.[33], 
+            note_orale_lang:result.rows[i]?.[34], 
+            note_ecrit_lang:result.rows[i]?.[35], 
+            taux_cc_lang:result.rows[i]?.[36], 
+            taux_orale_lang:result.rows[i]?.[37], 
+            date_saisie:result.rows[i]?.[38], 
+            date_last_modif:result.rows[i]?.[39], 
+            note_esb_01:result.rows[i]?.[40], 
+            note_esb_02:result.rows[i]?.[41], 
+            adresse_ip:result.rows[i]?.[42], 
+            nom_machine:result.rows[i]?.[43], 
+            note_ds1:result.rows[i]?.[44], 
+            note_ds2:result.rows[i]?.[45], 
+            note_ds3:result.rows[i]?.[46], 
+            note_ds4:result.rows[i]?.[47], 
+            note_ds5:result.rows[i]?.[48], 
+             
+            note_colle:result.rows[i]?.[49], 
+          } );
+            console.log(liste)
+          }
+        }
+      }
+      res.send(liste);
+    }else{
+      res.send('note non autorsié');
+    } 
+        
+       
+        
+        
+        
+ 
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Internal server error');
+  } finally {
+    if (connection) {
+      await connection.close();
+    }
+  }
+});
 
 }
 module.exports = {run}

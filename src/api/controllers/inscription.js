@@ -47,7 +47,7 @@ async function run(router,connectionProperties) {
    */
   router.route('/inscriptions/:id').get(function (request, response) {
     console.log("GET EMPLOYEES");
-  oracledb.getConnection(connectionProperties, function (err, connection) {
+  oracledb.getConnection(connectionProperties, async function (err, connection) {
     if (err) {
       console.error(err.message);
       response.status(500).send("Error connecting to DB");
@@ -55,6 +55,10 @@ async function run(router,connectionProperties) {
     }
     console.log("After connection");
     const { id } = request.params;
+     const auto = `SELECT etat_resultat FROM ESP_AUTORISATION`;
+    const resu = await connection.execute(auto );
+    console.log(resu.rows[0][0]);
+    if(resu.rows[0][0]==0){
     connection.execute("SELECT * FROM esp_inscription  where etudiant = :id",{id},
       { outFormat: oracledb.OBJECT },
       function (err, result) {
@@ -86,6 +90,10 @@ async function run(router,connectionProperties) {
         
         
       });
+
+    }else{
+      response.send("resultat n'est pas encore autorisé")
+    }
   });
   });
   

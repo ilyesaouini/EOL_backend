@@ -18,11 +18,26 @@ router.route('/postabsence1/').post(function (request, response) {
     }
      
     var body = request.body;
-    
+    const today = new Date();
+const yyyy = today.getFullYear();
+let mm = today.getMonth() + 1; // Months start at 0!
+let dd = today.getDate();
+
+if (dd < 10) dd = '0' + dd;
+if (mm < 10) mm = '0' + mm;
+function getMonthName(monthNumber) {
+  const date = new Date();
+  date.setMonth(monthNumber - 1);
+
+  return date.toLocaleString('en-US', { month: 'short' });
+}
+m =   getMonthName(mm); 
+
+const formattedToday = dd + '/' + m + '/' + yyyy;
 
     connection.execute("INSERT INTO ESP_ABSENCE_NEW (ID_ET,CODE_MODULE,CODE_CL,ANNEE_DEB,NUM_SEANCE,DATE_SEANCE,ID_ENS,DATE_SAISIE) values"+
   "(:ID_ET,:CODE_MODULE,:CODE_CL,:ANNEE_DEB,:NUM_SEANCE,:DATE_SEANCE,:ID_ENS,:DATE_SAISIE)",
-  [body.ID_ET,body.CODE_MODULE,body.CODE_CL,body.ANNEE_DEB,body.NUM_SEANCE,body.DATE_SEANCE,body.ID_ENS,body.date_saisie],
+  [body.ID_ET,body.CODE_MODULE,body.CODE_CL,body.ANNEE_DEB,body.NUM_SEANCE,formattedToday,body.ID_ENS,formattedToday],
       function (err, result) {
         if (err) {
           console.error(err.message);
@@ -38,54 +53,6 @@ router.route('/postabsence1/').post(function (request, response) {
 
 
 
-
-    /**
-     * post absence
-     */
-router.route('addabsence/').post(function(request,response){
-console.log("post absence");
-oracledb.getConnection(connectionProperties,async function(err,connection){
-
-    if(err){
-        con.error(err.message);
-        response.status(500).send("error connection to db");
-        return;
-    }
-    var body = request.body;
-    console.log("body is :"+body);
-    connection.execute("INSERT INTO ESP_ABSENCE_NEW (id_et,code_module,code_cl,annee_deb,num_seance,date_seance,id_ens) values"+
-    "(:id_et,:code_module,:code_cl,:annee_deb,:num_seance,:date_seance,:id_ens)",
-    [body.id_et,body.code_module,body.code_cl,body.annee_deb,body.num_seance,body.date_seance,body.id_ens],
-        function (err, result) {
-          if (err) {
-            console.log("ssss")
-            console.error(err.message);
-            response.status(500).send(err.message);
-            
-            return;
-          }
-          response.end();
-          
-        });
-})
-
-});
-
-router.route('addabsence1/').post(function(request,response){
-  console.log("post absence");
-  oracledb.getConnection(connectionProperties,async function(err,connection){
-  
-      if(err){
-          con.error(err.message);
-          response.status(500).send("error connection to db");
-          return;
-      }
-      var body = request.body;
-      console.log("body is :"+body);
-      const query = 'INSERT INTO ESP_ABSENCE_NEW (ID_ET,CODE_MODULE,CODE_CL,ANNEE_DEB,NUM_SEANCE,DATE_SEANCE,ID_ENS,DATE_SAISIE,UTILISATEUR,SEMESTRE,JUSTIFICATION,CODE_JUSTIF,LIB_JUSTIF,A_CONVOQUER,OBSERVATION,NEW_SEMESTRE) values(?)';
-    connection.execute(query, body);
-    })
-  });
 
 
 
@@ -112,7 +79,8 @@ router.route('/allabsences/').get(function (request, response) {
           doRelease(connection);
           return;
         }
-        console.log('iam here');
+        var dat =  Date.parse('dd/mm/yyy');
+        console.log('iam heresss '+dat);
         console.log("RESULTSET:" + JSON.stringify(result));
         var employees = [];
         result.rows.forEach(function (element) {
@@ -166,7 +134,7 @@ router.route('/allabsenceetudiant/:id').get(function (request, response) {
           doRelease(connection);
           return;
         }
-        console.log('iam here');
+        
         console.log("RESULTSET:" + JSON.stringify(result));
         var employees = [];
         result.rows.forEach(function (element) {

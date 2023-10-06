@@ -265,21 +265,46 @@ router.get('/notebymodule/:etudiant', async (req, res) => {
 
     const query = `SELECT * FROM ESP_NOTE WHERE etudiant = :etudiant`;
     const result = await connection.execute(query, { etudiant });
-      m = result.rows.module;
-      console.log(m);
+    var liste =[];
+    
     if (result.rows.length === 0) {
       return res.status(404).send('User not found');
-    }
-    const query1 = `SELECT etat FROM ESP_ENTETE_NOTE WHERE module = :module`;
-    const result1 = await connection.execute(query1, { m });
-    
-    if(result1.rows.etat == "validé"){
-      const user = result.rows[0];
-      res.send(user);
-
     }else{
-      return res.status(201).send('note ne pas encore validée');
-    }
+
+      for(
+        var i=0;i<= result.rows.length-1;i++
+        ){ 
+          m = result.rows[i];
+           console.log(m?.[1]);
+          
+           etat = m?.[1]
+           console.log("module"+etat)
+          
+          const query1 = `SELECT etat FROM ESP_ENTETE_NOTE WHERE code_module = :etat`;
+          const result1 = await connection.execute(query1, {etat });
+          if(result1.rows[0] == "validé"){
+            //liste = liste+  result.rows[i];
+           // liste.push(result.rows[i]);
+            liste.push({code_note: result.rows[i]?.[0], 
+              note_cc: result.rows[i]?.[1], 
+              note_tp: result.rows[i]?.[2], 
+              note_examen: result.rows[i]?.[3], 
+              abs_cc: result.rows[i]?.[4], 
+              abs_tp: result.rows[i]?.[5], 
+              abs_examen: result.rows[i]?.[6],   
+             module: result.rows[i]?.[7],
+            etudiant: result.rows[i]?.[8],} );
+            console.log(liste)
+          }
+        }
+      }
+      res.send(liste);
+       
+        
+       
+        
+        
+        
  
   } catch (error) {
     console.error(error);

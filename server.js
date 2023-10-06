@@ -165,7 +165,7 @@ app.listen(PORT);
 
 
 //web service import
-const user = require('./src/api/controllers/user');
+
 const absence = require('./src/api/controllers/absence');
 const admin = require('./src/api/controllers/admin');
 const annee = require('./src/api/controllers/annee');
@@ -193,7 +193,7 @@ const parametre = require('./src/api/controllers/parametre');
 
 
 //run
-user.run(router,connectionProperties); 
+ 
 absence.run(router,connectionProperties); 
 admin.run(router,connectionProperties,uploadimage); 
 annee.run(router,connectionProperties); 
