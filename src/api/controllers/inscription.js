@@ -58,7 +58,7 @@ async function run(router,connectionProperties) {
      const auto = `SELECT etat_resultat FROM ESP_AUTORISATION`;
     const resu = await connection.execute(auto );
     console.log(resu.rows[0][0]);
-    if(resu.rows[0][0]==0){
+    if(resu.rows[0][0]==1){
     connection.execute("SELECT * FROM esp_inscription  where etudiant = :id",{id},
       { outFormat: oracledb.OBJECT },
       function (err, result) {
